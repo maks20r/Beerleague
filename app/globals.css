@@ -45,8 +45,8 @@ select option {
   right: 0;
   height: 120px;
   background-image: url('/header-bg-main-132-2.jpg');
-  background-size: cover;
-  background-position: center;
+  background-size: 160%;
+  background-position: 35% center;
   background-repeat: no-repeat;
   z-index: 1000;
   overflow: visible;
