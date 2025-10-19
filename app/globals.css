@@ -387,3 +387,14 @@ body {
     min-width: 80px;
   }
 }
+
+/* Fix date and time inputs on mobile browsers */
+@media (max-width: 767px) {
+  input[type="date"],
+  input[type="time"] {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+  }
+}

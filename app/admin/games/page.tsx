@@ -435,7 +435,7 @@ export default function GamesPage() {
               </div>
             </div>
 
-            <form id="game-form" onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
+            <form id="game-form" onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
               {/* Overview Tab */}
               {activeTab === 'overview' && (
                 <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
