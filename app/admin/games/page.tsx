@@ -406,7 +406,7 @@ export default function GamesPage() {
       {/* Full Page Form */}
       {showModal && (
         <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
-          <div className="min-h-screen pt-24 sm:pt-32">
+          <div className="min-h-full pt-24 sm:pt-32 pb-8">
             {/* Tabs */}
             <div className="py-4 sm:py-6 px-4">
               <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">

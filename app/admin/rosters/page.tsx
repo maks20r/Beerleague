@@ -204,7 +204,7 @@ export default function RostersPage() {
       {/* Team Form */}
       {showTeamForm && (
         <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
-          <div className="min-h-screen pt-24 sm:pt-32">
+          <div className="min-h-full pt-24 sm:pt-32 pb-8">
             <form id="team-form" onSubmit={handleSubmitTeam} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
               <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-4">
                 <div>
@@ -333,7 +333,7 @@ export default function RostersPage() {
           {/* Player Form */}
           {showPlayerForm && (
             <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
-              <div className="min-h-screen pt-24 sm:pt-32">
+              <div className="min-h-full pt-24 sm:pt-32 pb-8">
                 <form id="player-form" onSubmit={handleSubmitPlayer} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
                   <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-4">
                     <div>
