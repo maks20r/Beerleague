@@ -443,7 +443,7 @@ export default function GamesPage() {
               {/* Date and Time Section */}
               <div className="mb-12 relative">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Date & Time</h4>
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Game Date *
@@ -453,7 +453,7 @@ export default function GamesPage() {
                       value={formData.date}
                       onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                       required
-                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      className="w-full max-w-full box-border px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     />
                   </div>
                   <div>
@@ -466,7 +466,7 @@ export default function GamesPage() {
                       onChange={(e) => setFormData({ ...formData, time: e.target.value })}
                       required
                       step="900"
-                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      className="w-full max-w-full box-border px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                       placeholder="HH:MM"
                     />
                     <p className="text-xs text-gray-600 mt-1">Use 24-hour format (e.g., 19:00 for 7:00 PM)</p>
