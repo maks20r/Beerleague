@@ -370,10 +370,10 @@ export default function GamesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
         <div>
-          <h2 className="text-3xl font-bold text-gray-900">Game Schedule</h2>
-          <p className="text-gray-600 mt-1">Manage game schedules and scores</p>
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Game Schedule</h2>
+          <p className="text-sm sm:text-base text-gray-600 mt-1">Manage game schedules and scores</p>
         </div>
         <button
           onClick={() => {
@@ -397,7 +397,7 @@ export default function GamesPage() {
             });
             setShowModal(true);
           }}
-          className="bg-[#e9ca8a] text-black px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold shadow-lg hover:shadow-xl"
+          className="w-full sm:w-auto bg-[#e9ca8a] text-black px-4 sm:px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold shadow-lg hover:shadow-xl text-sm sm:text-base"
         >
           + Add New Game
         </button>
@@ -406,14 +406,14 @@ export default function GamesPage() {
       {/* Full Page Form */}
       {showModal && (
         <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
-          <div className="min-h-screen pt-32">
+          <div className="min-h-screen pt-24 sm:pt-32">
             {/* Tabs */}
-            <div className="py-6">
-              <div className="max-w-2xl mx-auto flex gap-4 justify-center">
+            <div className="py-4 sm:py-6 px-4">
+              <div className="max-w-2xl mx-auto flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center">
                 <button
                   type="button"
                   onClick={() => setActiveTab('overview')}
-                  className={`px-12 py-4 font-semibold text-lg transition-all rounded-lg ${
+                  className={`px-6 sm:px-12 py-3 sm:py-4 font-semibold text-base sm:text-lg transition-all rounded-lg ${
                     activeTab === 'overview'
                       ? 'bg-[#e9ca8a] text-black shadow-lg scale-105'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -424,7 +424,7 @@ export default function GamesPage() {
                 <button
                   type="button"
                   onClick={() => setActiveTab('results')}
-                  className={`px-12 py-4 font-semibold text-lg transition-all rounded-lg ${
+                  className={`px-6 sm:px-12 py-3 sm:py-4 font-semibold text-base sm:text-lg transition-all rounded-lg ${
                     activeTab === 'results'
                       ? 'bg-[#e9ca8a] text-black shadow-lg scale-105'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
@@ -435,10 +435,10 @@ export default function GamesPage() {
               </div>
             </div>
 
-            <form id="game-form" onSubmit={handleSubmit} className="max-w-4xl mx-auto p-8 space-y-6">
+            <form id="game-form" onSubmit={handleSubmit} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6">
               {/* Overview Tab */}
               {activeTab === 'overview' && (
-                <div className="p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
+                <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
 
               {/* Date and Time Section */}
               <div className="mb-12 relative">
@@ -486,8 +486,8 @@ export default function GamesPage() {
                   <label className="block text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
                     Select Division *
                   </label>
-                  <div className="grid grid-cols-2 gap-6">
-                    <label className={`relative flex flex-col items-center justify-center px-8 py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'A' ? 'bg-gradient-to-br from-[#e9ca8a] to-[#d4b574] border-[#e9ca8a] text-black shadow-[0_0_20px_rgba(233,202,138,0.4)] scale-105' : 'bg-white border-gray-300 text-gray-700 hover:border-[#e9ca8a] hover:shadow-lg'}`}>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-6">
+                    <label className={`relative flex flex-col items-center justify-center px-4 sm:px-8 py-4 sm:py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'A' ? 'bg-gradient-to-br from-[#e9ca8a] to-[#d4b574] border-[#e9ca8a] text-black shadow-[0_0_20px_rgba(233,202,138,0.4)] scale-105' : 'bg-white border-gray-300 text-gray-700 hover:border-[#e9ca8a] hover:shadow-lg'}`}>
                       {formData.division === 'A' && (
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -skew-x-12"></div>
                       )}
@@ -499,13 +499,13 @@ export default function GamesPage() {
                         onChange={(e) => setFormData({ ...formData, division: e.target.value as 'A' | 'B' })}
                         className="sr-only"
                       />
-                      <span className="text-4xl font-black mb-2 relative z-10">A</span>
-                      <span className="font-bold text-sm uppercase tracking-wider relative z-10">Division A</span>
+                      <span className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2 relative z-10">A</span>
+                      <span className="font-bold text-xs sm:text-sm uppercase tracking-wider relative z-10">Division A</span>
                       {formData.division === 'A' && (
                         <div className="absolute top-2 right-2 w-3 h-3 bg-black rounded-full animate-pulse"></div>
                       )}
                     </label>
-                    <label className={`relative flex flex-col items-center justify-center px-8 py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'B' ? 'bg-gradient-to-br from-black to-gray-800 border-black text-[#e9ca8a] shadow-[0_0_20px_rgba(0,0,0,0.4)] scale-105' : 'bg-white border-gray-300 text-gray-700 hover:border-black hover:shadow-lg'}`}>
+                    <label className={`relative flex flex-col items-center justify-center px-4 sm:px-8 py-4 sm:py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'B' ? 'bg-gradient-to-br from-black to-gray-800 border-black text-[#e9ca8a] shadow-[0_0_20px_rgba(0,0,0,0.4)] scale-105' : 'bg-white border-gray-300 text-gray-700 hover:border-black hover:shadow-lg'}`}>
                       {formData.division === 'B' && (
                         <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#e9ca8a]/20 to-transparent -skew-x-12"></div>
                       )}
@@ -517,8 +517,8 @@ export default function GamesPage() {
                         onChange={(e) => setFormData({ ...formData, division: e.target.value as 'A' | 'B' })}
                         className="sr-only"
                       />
-                      <span className="text-4xl font-black mb-2 relative z-10">B</span>
-                      <span className="font-bold text-sm uppercase tracking-wider relative z-10">Division B</span>
+                      <span className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2 relative z-10">B</span>
+                      <span className="font-bold text-xs sm:text-sm uppercase tracking-wider relative z-10">Division B</span>
                       {formData.division === 'B' && (
                         <div className="absolute top-2 right-2 w-3 h-3 bg-[#e9ca8a] rounded-full animate-pulse"></div>
                       )}
@@ -624,7 +624,7 @@ export default function GamesPage() {
 
               {/* Results Tab */}
               {activeTab === 'results' && (
-                <div className="p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-12">
+                <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-8 sm:space-y-12">
 
                   {/* Score Section */}
                   <div>
@@ -780,8 +780,8 @@ export default function GamesPage() {
 
                   {/* Goals Section */}
                   <div>
-                    <h4 className="text-xl font-bold text-gray-900 mb-4">Goals</h4>
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <h4 className="text-base sm:text-xl font-bold text-gray-900 mb-4">Goals</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       {/* Home Team Goals */}
                       <div>
                         <div className="flex justify-between items-center mb-3">
@@ -933,8 +933,8 @@ export default function GamesPage() {
 
                   {/* Penalties Section */}
                   <div>
-                    <h4 className="text-xl font-bold text-gray-900 mb-4">Penalties</h4>
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <h4 className="text-base sm:text-xl font-bold text-gray-900 mb-4">Penalties</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                       {/* Home Team Penalties */}
                       <div>
                         <div className="flex justify-between items-center mb-3">
@@ -1062,11 +1062,11 @@ export default function GamesPage() {
             </form>
 
             {/* Action Buttons */}
-            <div className="max-w-4xl mx-auto px-8 pb-8 flex gap-4 justify-end">
+            <div className="max-w-4xl mx-auto px-4 sm:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
               <button
                 type="button"
                 onClick={resetForm}
-                className="px-10 py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-base text-gray-700 hover:text-gray-900"
+                className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-sm sm:text-base text-gray-700 hover:text-gray-900"
               >
                 Close
               </button>
@@ -1074,7 +1074,7 @@ export default function GamesPage() {
                 type="submit"
                 form="game-form"
                 disabled={saving}
-                className={`relative overflow-hidden flex items-center justify-center gap-2 px-12 py-4 rounded-lg transition-all duration-500 font-bold text-base tracking-wide uppercase ${
+                className={`w-full sm:w-auto relative overflow-hidden flex items-center justify-center gap-2 px-8 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-500 font-bold text-sm sm:text-base tracking-wide uppercase ${
                   saving
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200'
                     : 'bg-[#e9ca8a] text-black border-2 border-[#e9ca8a] hover:bg-[#d4b574] hover:border-[#d4b574] hover:scale-105 hover:shadow-2xl'
@@ -1095,74 +1095,78 @@ export default function GamesPage() {
 
       {/* Games Table */}
       <div className="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200">
-        <table className="w-full">
-          <thead className="bg-[#faf6ee] border-b-2 border-gray-200">
-            <tr>
-              <th className="px-6 py-4 text-left font-bold text-gray-700">Game #</th>
-              <th className="px-6 py-4 text-left font-bold text-gray-700">Date/Time</th>
-              <th className="px-6 py-4 text-left font-bold text-gray-700">Matchup</th>
-              <th className="px-6 py-4 text-center font-bold text-gray-700">Division</th>
-              <th className="px-6 py-4 text-left font-bold text-gray-700">Venue</th>
-              <th className="px-6 py-4 text-center font-bold text-gray-700">Score</th>
-              <th className="px-6 py-4 text-center font-bold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {games.map((game, index) => {
-              return (
-                <tr key={game.id} className={`border-b hover:bg-[#fcfaf5] transition ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
-                  <td className="px-6 py-4 text-black font-bold text-lg">
-                    #{game.gameNumber}
-                  </td>
-                  <td className="px-6 py-4 text-gray-700 font-medium">
-                    {new Date(game.date).toLocaleString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric',
-                      hour: 'numeric',
-                      minute: '2-digit'
-                    })}
-                  </td>
-                  <td className="px-6 py-4 text-gray-900 font-semibold">
-                    {game.awayTeamId} <span className="text-gray-500">@</span> {game.homeTeamId}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                      game.division === 'A' ? 'bg-[#e9ca8a] text-black' : 'bg-black text-[#e9ca8a]'
-                    }`}>
-                      Division {game.division}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-gray-700">{game.venue || '-'}</td>
-                  <td className="px-6 py-4 text-center text-gray-900 font-bold text-lg">
-                    {game.homeScore !== undefined && game.awayScore !== undefined
-                      ? `${game.awayScore} - ${game.homeScore}`
-                      : '-'}
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleEdit(game)}
-                      className="text-black hover:opacity-60 font-semibold mr-4 transition"
-                    >
-                      ✏️ Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(game.id)}
-                      className="text-red-600 hover:text-red-800 font-semibold hover:underline"
-                    >
-                      🗑️ Delete
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+        <div className="table-scroll-wrapper">
+          <table className="w-full mobile-compact-table">
+            <thead className="bg-[#faf6ee] border-b-2 border-gray-200">
+              <tr>
+                <th className="px-6 py-4 text-left font-bold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Game #</th>
+                <th className="px-6 py-4 text-left font-bold text-gray-700">Date/Time</th>
+                <th className="px-6 py-4 text-left font-bold text-gray-700">Matchup</th>
+                <th className="px-6 py-4 text-center font-bold text-gray-700">Div</th>
+                <th className="px-6 py-4 text-left font-bold text-gray-700 hidden md:table-cell">Venue</th>
+                <th className="px-6 py-4 text-center font-bold text-gray-700">Score</th>
+                <th className="px-6 py-4 text-center font-bold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {games.map((game, index) => {
+                return (
+                  <tr key={game.id} className={`border-b hover:bg-[#fcfaf5] transition ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
+                    <td className="px-6 py-4 text-black font-bold text-base sm:text-lg sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>
+                      #{game.gameNumber}
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 font-medium text-sm sm:text-base">
+                      {new Date(game.date).toLocaleString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                        hour: 'numeric',
+                        minute: '2-digit'
+                      })}
+                    </td>
+                    <td className="px-6 py-4 text-gray-900 font-semibold text-sm sm:text-base">
+                      {game.awayTeamId} <span className="text-gray-500">@</span> {game.homeTeamId}
+                    </td>
+                    <td className="px-6 py-4 text-center">
+                      <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${
+                        game.division === 'A' ? 'bg-[#e9ca8a] text-black' : 'bg-black text-[#e9ca8a]'
+                      }`}>
+                        <span className="hidden sm:inline">Division </span>{game.division}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-gray-700 hidden md:table-cell">{game.venue || '-'}</td>
+                    <td className="px-6 py-4 text-center text-gray-900 font-bold text-base sm:text-lg">
+                      {game.homeScore !== undefined && game.awayScore !== undefined
+                        ? `${game.awayScore} - ${game.homeScore}`
+                        : '-'}
+                    </td>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex flex-row gap-4 items-center justify-center">
+                        <button
+                          onClick={() => handleEdit(game)}
+                          className="text-black hover:opacity-60 font-semibold transition text-sm sm:text-base whitespace-nowrap"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDelete(game.id)}
+                          className="text-red-600 hover:text-red-800 font-semibold hover:underline text-sm sm:text-base whitespace-nowrap"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         {games.length === 0 && (
           <div className="text-center py-12 text-gray-500">
-            <div className="text-6xl mb-4">🏒</div>
-            <p className="text-lg font-semibold">No games scheduled yet</p>
-            <p className="text-sm mt-2">Click "Add New Game" to create your first game</p>
+            <div className="text-4xl sm:text-6xl mb-4">🏒</div>
+            <p className="text-base sm:text-lg font-semibold">No games scheduled yet</p>
+            <p className="text-xs sm:text-sm mt-2">Click "Add New Game" to create your first game</p>
           </div>
         )}
       </div>

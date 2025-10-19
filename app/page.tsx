@@ -81,12 +81,12 @@ export default function Home() {
       <main className="container mx-auto px-4 py-8">
         {/* Team Standings */}
         <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">Team Standings</h2>
-            <div className="flex gap-2">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">Team Standings</h2>
+            <div className="flex gap-2 w-full sm:w-auto">
               <button
                 onClick={() => setSelectedDivision('A')}
-                className={`px-6 py-2 rounded-lg font-semibold transition ${
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base ${
                   selectedDivision === 'A'
                     ? 'bg-[#e9ca8a] text-black'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -96,7 +96,7 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setSelectedDivision('B')}
-                className={`px-6 py-2 rounded-lg font-semibold transition ${
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base ${
                   selectedDivision === 'B'
                     ? 'bg-[#e9ca8a] text-black'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -107,112 +107,118 @@ export default function Home() {
             </div>
           </div>
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[#faf6ee] border-b">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold text-gray-700">Team</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">W</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">L</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">T</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GF</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GA</th>
-                </tr>
-              </thead>
-              <tbody>
-                {teams.map((team, index) => (
-                  <tr key={team.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{team.name}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.wins + team.losses + team.ties}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.wins}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.losses}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.ties}</td>
-                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{team.points}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.goalsFor}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{team.goalsAgainst}</td>
+            <div className="table-scroll-wrapper">
+              <table className="w-full mobile-compact-table">
+                <thead className="bg-[#faf6ee] border-b">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Team</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">W</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">L</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">T</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GF</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GA</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {teams.map((team, index) => (
+                    <tr key={team.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
+                      <td className="px-6 py-4 font-medium text-gray-900 sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{team.name}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.wins + team.losses + team.ties}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.wins}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.losses}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.ties}</td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900">{team.points}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.goalsFor}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{team.goalsAgainst}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
         {/* Player Stats */}
         <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">
               {showAllPlayers ? 'All Players' : 'Top Players'}
             </h2>
             <button
               onClick={() => setShowAllPlayers(!showAllPlayers)}
-              className="px-6 py-2 rounded-lg font-semibold transition bg-[#e9ca8a] text-black hover:bg-[#d4b577]"
+              className="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition bg-[#e9ca8a] text-black hover:bg-[#d4b577] text-sm sm:text-base"
             >
               {showAllPlayers ? 'Show Top 10' : 'View All Players'}
             </button>
           </div>
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[#faf6ee] border-b">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold text-gray-700">Player</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">Pos</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">#</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">G</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">A</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">PIM</th>
-                </tr>
-              </thead>
-              <tbody>
-                {players.map((player, index) => (
-                  <tr key={player.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{player.name}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.jerseyNumber}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
-                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{player.penaltyMinutes}</td>
+            <div className="table-scroll-wrapper">
+              <table className="w-full mobile-compact-table">
+                <thead className="bg-[#faf6ee] border-b">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Player</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">Pos</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">#</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">G</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">A</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">PIM</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {players.map((player, index) => (
+                    <tr key={player.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
+                      <td className="px-6 py-4 font-medium text-gray-900 sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{player.name}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.jerseyNumber}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{player.penaltyMinutes}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </section>
 
         {/* Goalie Stats */}
         <section className="mb-12">
-          <h2 className="text-3xl font-bold mb-6 text-gray-800">Top Goalies</h2>
+          <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-gray-800">Top Goalies</h2>
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="w-full">
-              <thead className="bg-[#faf6ee] border-b">
-                <tr>
-                  <th className="px-6 py-4 text-left font-semibold text-gray-700">Goalie</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">Shots</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">GA</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">Saves</th>
-                  <th className="px-6 py-4 text-center font-semibold text-gray-700">SV%</th>
-                </tr>
-              </thead>
-              <tbody>
-                {goalies.map((goalie, index) => (
-                  <tr key={goalie.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
-                    <td className="px-6 py-4 font-medium text-gray-900">{goalie.name}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{goalie.gamesPlayed}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{goalie.totalShots}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{goalie.goalsAllowed}</td>
-                    <td className="px-6 py-4 text-center text-gray-700">{goalie.saves}</td>
-                    <td className="px-6 py-4 text-center font-semibold text-gray-900">
-                      {goalie.savePercentage.toFixed(2)}%
-                    </td>
+            <div className="table-scroll-wrapper">
+              <table className="w-full mobile-compact-table">
+                <thead className="bg-[#faf6ee] border-b">
+                  <tr>
+                    <th className="px-6 py-4 text-left font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Goalie</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">Shots</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GA</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">Saves</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">SV%</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {goalies.map((goalie, index) => (
+                    <tr key={goalie.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
+                      <td className="px-6 py-4 font-medium text-gray-900 sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{goalie.name}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{goalie.gamesPlayed}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{goalie.totalShots}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{goalie.goalsAllowed}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{goalie.saves}</td>
+                      <td className="px-6 py-4 text-center font-semibold text-gray-900">
+                        {goalie.savePercentage.toFixed(2)}%
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
           {goalies.length === 0 && (
             <div className="bg-white rounded-lg shadow p-8 text-center text-gray-500">
@@ -223,15 +229,15 @@ export default function Home() {
 
         {/* Upcoming Games */}
         <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">
               {showAllGames ? 'All Games' : 'Upcoming Games (Next 7 Days)'}
             </h2>
-            <div className="flex gap-3 items-center">
-              <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-3 items-stretch sm:items-center">
+              <div className="flex gap-2 flex-wrap">
                 <button
                   onClick={() => setGamesDivision('all')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                     gamesDivision === 'all'
                       ? 'bg-[#e9ca8a] text-black'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -241,29 +247,29 @@ export default function Home() {
                 </button>
                 <button
                   onClick={() => setGamesDivision('A')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                     gamesDivision === 'A'
                       ? 'bg-blue-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  Division A
+                  Div A
                 </button>
                 <button
                   onClick={() => setGamesDivision('B')}
-                  className={`px-4 py-2 rounded-lg font-semibold transition ${
+                  className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                     gamesDivision === 'B'
                       ? 'bg-green-600 text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                   }`}
                 >
-                  Division B
+                  Div B
                 </button>
               </div>
               <button
                 onClick={toggleGamesView}
                 disabled={loadingGames}
-                className={`px-6 py-2 rounded-lg font-semibold transition ${
+                className={`w-full sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm ${
                   loadingGames
                     ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
                     : 'bg-black text-[#e9ca8a] hover:bg-gray-900'
@@ -277,9 +283,9 @@ export default function Home() {
             {games.map((game) => {
               const gameDate = game.date instanceof Date ? game.date : new Date(game.date);
               return (
-                <div key={game.id} className="bg-white rounded-lg shadow p-6">
+                <div key={game.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
                   <div className="flex justify-between items-center mb-3">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500">
                       {gameDate && !isNaN(gameDate.getTime()) ? gameDate.toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
@@ -296,25 +302,25 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-center flex-1">
-                      <div className="font-semibold text-lg text-gray-900">{game.awayTeamId}</div>
-                      <div className="text-sm text-gray-500">Away</div>
+                      <div className="font-semibold text-base sm:text-lg text-gray-900 break-words">{game.awayTeamId}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Away</div>
                       {game.status === 'completed' && game.awayScore !== undefined && (
-                        <div className="text-2xl font-bold text-[#e9ca8a] mt-1">{game.awayScore}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-[#e9ca8a] mt-1">{game.awayScore}</div>
                       )}
                     </div>
-                    <div className="px-4 text-gray-400 font-semibold">
+                    <div className="px-2 sm:px-4 text-gray-400 font-semibold text-sm">
                       {game.status === 'completed' ? 'vs' : '@'}
                     </div>
                     <div className="text-center flex-1">
-                      <div className="font-semibold text-lg text-gray-900">{game.homeTeamId}</div>
-                      <div className="text-sm text-gray-500">Home</div>
+                      <div className="font-semibold text-base sm:text-lg text-gray-900 break-words">{game.homeTeamId}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Home</div>
                       {game.status === 'completed' && game.homeScore !== undefined && (
-                        <div className="text-2xl font-bold text-[#e9ca8a] mt-1">{game.homeScore}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-[#e9ca8a] mt-1">{game.homeScore}</div>
                       )}
                     </div>
                   </div>
                   {game.venue && (
-                    <div className="mt-3 text-sm text-gray-500 text-center">
+                    <div className="mt-3 text-xs sm:text-sm text-gray-500 text-center break-words">
                       {game.venue}
                     </div>
                   )}
@@ -331,12 +337,12 @@ export default function Home() {
 
         {/* Recent Games (Last 7 Days) */}
         <section className="mb-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-3xl font-bold text-gray-800">Recent Games</h2>
-            <div className="flex gap-2">
+          <div className="mb-6">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-4">Recent Games</h2>
+            <div className="flex gap-2 flex-wrap">
               <button
                 onClick={() => setRecentGamesDivision('all')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                   recentGamesDivision === 'all'
                     ? 'bg-[#e9ca8a] text-black'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -346,23 +352,23 @@ export default function Home() {
               </button>
               <button
                 onClick={() => setRecentGamesDivision('A')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                   recentGamesDivision === 'A'
                     ? 'bg-blue-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                Division A
+                Div A
               </button>
               <button
                 onClick={() => setRecentGamesDivision('B')}
-                className={`px-4 py-2 rounded-lg font-semibold transition ${
+                className={`flex-1 sm:flex-initial px-3 sm:px-4 py-2 rounded-lg font-semibold transition text-sm ${
                   recentGamesDivision === 'B'
                     ? 'bg-green-600 text-white'
                     : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
               >
-                Division B
+                Div B
               </button>
             </div>
           </div>
@@ -370,9 +376,9 @@ export default function Home() {
             {recentGames.map((game) => {
               const gameDate = game.date instanceof Date ? game.date : new Date(game.date);
               return (
-                <div key={game.id} className="bg-white rounded-lg shadow p-6">
+                <div key={game.id} className="bg-white rounded-lg shadow p-4 sm:p-6">
                   <div className="flex justify-between items-center mb-3">
-                    <div className="text-sm text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500">
                       {gameDate && !isNaN(gameDate.getTime()) ? gameDate.toLocaleDateString('en-US', {
                         weekday: 'short',
                         month: 'short',
@@ -389,23 +395,23 @@ export default function Home() {
                   </div>
                   <div className="flex justify-between items-center">
                     <div className="text-center flex-1">
-                      <div className="font-semibold text-lg text-gray-900">{game.awayTeamId}</div>
-                      <div className="text-sm text-gray-500">Away</div>
+                      <div className="font-semibold text-base sm:text-lg text-gray-900 break-words">{game.awayTeamId}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Away</div>
                       {game.status === 'completed' && game.awayScore !== undefined && (
-                        <div className="text-2xl font-bold text-[#e9ca8a] mt-1">{game.awayScore}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-[#e9ca8a] mt-1">{game.awayScore}</div>
                       )}
                     </div>
-                    <div className="px-4 text-gray-400 font-semibold">vs</div>
+                    <div className="px-2 sm:px-4 text-gray-400 font-semibold text-sm">vs</div>
                     <div className="text-center flex-1">
-                      <div className="font-semibold text-lg text-gray-900">{game.homeTeamId}</div>
-                      <div className="text-sm text-gray-500">Home</div>
+                      <div className="font-semibold text-base sm:text-lg text-gray-900 break-words">{game.homeTeamId}</div>
+                      <div className="text-xs sm:text-sm text-gray-500">Home</div>
                       {game.status === 'completed' && game.homeScore !== undefined && (
-                        <div className="text-2xl font-bold text-[#e9ca8a] mt-1">{game.homeScore}</div>
+                        <div className="text-xl sm:text-2xl font-bold text-[#e9ca8a] mt-1">{game.homeScore}</div>
                       )}
                     </div>
                   </div>
                   {game.venue && (
-                    <div className="mt-3 text-sm text-gray-500 text-center">
+                    <div className="mt-3 text-xs sm:text-sm text-gray-500 text-center break-words">
                       {game.venue}
                     </div>
                   )}
@@ -422,10 +428,10 @@ export default function Home() {
 
       </main>
 
-      <footer className="bg-black text-[#e9ca8a] py-6 mt-12">
+      <footer className="bg-black text-[#e9ca8a] py-4 sm:py-6 mt-12">
         <div className="container mx-auto px-4 text-center">
-          <p>&copy; {new Date().getFullYear()} Hockey League. All rights reserved.</p>
-          <Link href="/admin/login" className="inline-block mt-4 bg-[#e9ca8a] text-black px-6 py-2 rounded-lg hover:bg-[#d4b574] transition-colors font-semibold">
+          <p className="text-sm sm:text-base">&copy; {new Date().getFullYear()} Hockey League. All rights reserved.</p>
+          <Link href="/admin/login" className="inline-block mt-3 sm:mt-4 bg-[#e9ca8a] text-black px-4 sm:px-6 py-2 rounded-lg hover:bg-[#d4b574] transition-colors font-semibold text-sm sm:text-base">
             Admin Dashboard
           </Link>
         </div>

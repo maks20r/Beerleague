@@ -174,12 +174,12 @@ export default function RostersPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Teams & Rosters</h2>
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 sm:mb-8 gap-4">
+        <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">Teams & Rosters</h2>
+        <div className="flex gap-2 w-full sm:w-auto">
           <button
             onClick={() => setSelectedDivision('A')}
-            className={`px-6 py-2 rounded-lg font-semibold transition ${
+            className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base ${
               selectedDivision === 'A'
                 ? 'bg-[#e9ca8a] text-black'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -189,7 +189,7 @@ export default function RostersPage() {
           </button>
           <button
             onClick={() => setSelectedDivision('B')}
-            className={`px-6 py-2 rounded-lg font-semibold transition ${
+            className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 rounded-lg font-semibold transition text-sm sm:text-base ${
               selectedDivision === 'B'
                 ? 'bg-[#e9ca8a] text-black'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
@@ -272,61 +272,64 @@ export default function RostersPage() {
       )}
 
       {/* Teams Table */}
-      <div className="bg-white rounded-lg shadow-lg mb-8">
-        <table className="w-full">
-          <thead className="bg-[#faf6ee] border-b">
-            <tr>
-              <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Team Name</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Players</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">W</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">L</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">T</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Points</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">GF</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">GA</th>
-              <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {teams.map((team, index) => {
-              const teamPlayers = players.filter(p => p.teamId === team.id);
-              return (
-                <tr key={team.id} className={`border-b hover:bg-[#faf6ee] ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
-                  <td className="px-6 py-4 text-gray-900 font-semibold">{team.name}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{teamPlayers.length}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{team.wins}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{team.losses}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{team.ties}</td>
-                  <td className="px-6 py-4 text-center font-semibold text-gray-900">{team.points}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{team.goalsFor}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{team.goalsAgainst}</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => setSelectedTeamId(team.id)}
-                      className="bg-[#e9ca8a] hover:bg-[#d4b577] text-black font-medium px-3 py-1 rounded transition"
-                    >
-                      View Roster
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+      <div className="bg-white rounded-lg shadow-lg mb-8 overflow-hidden">
+        <div className="table-scroll-wrapper">
+          <table className="w-full mobile-compact-table">
+            <thead className="bg-[#faf6ee] border-b">
+              <tr>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Team Name</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Players</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">W</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">L</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">T</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">PTS</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700 hidden md:table-cell">GF</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700 hidden md:table-cell">GA</th>
+                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {teams.map((team, index) => {
+                const teamPlayers = players.filter(p => p.teamId === team.id);
+                return (
+                  <tr key={team.id} className={`border-b hover:bg-[#faf6ee] ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
+                    <td className="px-6 py-4 text-gray-900 font-semibold sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{team.name}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{teamPlayers.length}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{team.wins}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{team.losses}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{team.ties}</td>
+                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{team.points}</td>
+                    <td className="px-6 py-4 text-center text-gray-700 hidden md:table-cell">{team.goalsFor}</td>
+                    <td className="px-6 py-4 text-center text-gray-700 hidden md:table-cell">{team.goalsAgainst}</td>
+                    <td className="px-6 py-4 text-center">
+                      <button
+                        onClick={() => setSelectedTeamId(team.id)}
+                        className="bg-[#e9ca8a] hover:bg-[#d4b577] text-black font-medium px-2 sm:px-3 py-1 rounded transition text-xs sm:text-sm"
+                      >
+                        <span className="hidden sm:inline">View Roster</span>
+                        <span className="sm:hidden">View</span>
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
         {teams.length === 0 && (
           <div className="px-6 py-8 text-center text-gray-500">
-            <div className="text-6xl mb-4">🏒</div>
-            <p className="text-lg font-semibold">No teams yet</p>
-            <p className="text-sm mt-2">Click "Add New Team" to create your first team</p>
+            <div className="text-4xl sm:text-6xl mb-4">🏒</div>
+            <p className="text-base sm:text-lg font-semibold">No teams yet</p>
+            <p className="text-xs sm:text-sm mt-2">Click "Add New Team" to create your first team</p>
           </div>
         )}
       </div>
 
       {/* Player Roster Section */}
       {selectedTeamId && (
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h3 className="text-2xl font-bold text-gray-900">
+        <div className="bg-white rounded-lg shadow-lg p-4 sm:p-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+            <h3 className="text-xl sm:text-2xl font-bold text-gray-900">
               {teams.find(t => t.id === selectedTeamId)?.name} Roster
             </h3>
             <button
@@ -334,7 +337,7 @@ export default function RostersPage() {
                 setPlayerForm({ ...playerForm, teamId: selectedTeamId });
                 setShowPlayerForm(true);
               }}
-              className="bg-[#e9ca8a] text-black px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold"
+              className="w-full sm:w-auto bg-[#e9ca8a] text-black px-4 sm:px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold text-sm sm:text-base"
             >
               + Add Player
             </button>
@@ -483,51 +486,55 @@ export default function RostersPage() {
           )}
 
           {/* Players Table */}
-          <table className="w-full">
-            <thead className="bg-[#faf6ee] border-b">
-              <tr>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
-                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">Name</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Pos</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">GP</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">G</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">A</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">PTS</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">PIM</th>
-                <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredPlayers.map((player, index) => (
-                <tr key={player.id} className={`border-b hover:bg-[#faf6ee] ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
-                  <td className="px-6 py-4 text-gray-700">{player.jerseyNumber}</td>
-                  <td className="px-6 py-4 text-gray-900 font-semibold">{player.name}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
-                  <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>
-                  <td className="px-6 py-4 text-center text-gray-700">{player.penaltyMinutes}</td>
-                  <td className="px-6 py-4 text-center">
-                    <button
-                      onClick={() => handleEditPlayer(player)}
-                      className="text-black hover:opacity-60 font-medium mr-3 transition"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDeletePlayer(player.id)}
-                      className="text-red-600 hover:text-red-800 font-medium"
-                    >
-                      Delete
-                    </button>
-                  </td>
+          <div className="table-scroll-wrapper">
+            <table className="w-full mobile-compact-table">
+              <thead className="bg-[#faf6ee] border-b">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Name</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Pos</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700 hidden sm:table-cell">GP</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">G</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">A</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">PTS</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700 hidden sm:table-cell">PIM</th>
+                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filteredPlayers.map((player, index) => (
+                  <tr key={player.id} className={`border-b hover:bg-[#faf6ee] ${index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}`}>
+                    <td className="px-6 py-4 text-gray-700">{player.jerseyNumber}</td>
+                    <td className="px-6 py-4 text-gray-900 font-semibold sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{player.name}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
+                    <td className="px-6 py-4 text-center text-gray-700 hidden sm:table-cell">{player.gamesPlayed}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
+                    <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
+                    <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>
+                    <td className="px-6 py-4 text-center text-gray-700 hidden sm:table-cell">{player.penaltyMinutes}</td>
+                    <td className="px-3 sm:px-6 py-4">
+                      <div className="flex flex-row gap-4 items-center justify-center">
+                        <button
+                          onClick={() => handleEditPlayer(player)}
+                          className="text-black hover:opacity-60 font-medium transition text-xs sm:text-sm whitespace-nowrap"
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleDeletePlayer(player.id)}
+                          className="text-red-600 hover:text-red-800 font-medium text-xs sm:text-sm whitespace-nowrap"
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           {filteredPlayers.length === 0 && (
-            <div className="px-6 py-8 text-center text-gray-500">
+            <div className="px-6 py-8 text-center text-gray-500 text-sm">
               No players on this team yet. Click "Add Player" to get started.
             </div>
           )}
