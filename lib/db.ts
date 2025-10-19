@@ -232,14 +232,14 @@ export const getRecentGames = async (days: number = 7, division?: 'A' | 'B'): Pr
 
 export const getAllGames = async (division?: 'A' | 'B'): Promise<Game[]> => {
   const gamesCol = collection(db, 'games');
-  
+
   let q = query(gamesCol, orderBy('date', 'asc'));
-  
+
   // Add division filter if specified
   if (division) {
     q = query(gamesCol, where('division', '==', division), orderBy('date', 'asc'));
   }
-  
+
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => {
     const data = doc.data();
@@ -255,6 +255,28 @@ export const getAllGames = async (division?: 'A' | 'B'): Promise<Game[]> => {
       awayShots: data.awayShots || 0,
     } as Game;
   });
+};
+
+export const getGameById = async (id: string): Promise<Game | null> => {
+  const gameRef = doc(db, 'games', id);
+  const gameDoc = await getDoc(gameRef);
+
+  if (!gameDoc.exists()) {
+    return null;
+  }
+
+  const data = gameDoc.data();
+  return {
+    id: gameDoc.id,
+    ...data,
+    date: data.date ? data.date.toDate() : new Date(),
+    homeGoals: data.homeGoals || [],
+    awayGoals: data.awayGoals || [],
+    homePenalties: data.homePenalties || [],
+    awayPenalties: data.awayPenalties || [],
+    homeShots: data.homeShots || 0,
+    awayShots: data.awayShots || 0,
+  } as Game;
 };
 
 export const addGame = async (game: Omit<Game, 'id' | 'gameNumber'>) => {

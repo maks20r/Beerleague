@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { getAllGames, getTeams, getPlayers, getGoalies, addGame, updateGame, deleteGame, updateTeamStandings, updatePlayerStatsFromGame, updateGoalieStatsFromGame } from '@/lib/db';
 import { Game, Team, Player, Goalie } from '@/types';
 
 export default function GamesPage() {
+  const router = useRouter();
   const [games, setGames] = useState<Game[]>([]);
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
@@ -376,27 +378,7 @@ export default function GamesPage() {
           <p className="text-sm sm:text-base text-gray-600 mt-1">Manage game schedules and scores</p>
         </div>
         <button
-          onClick={() => {
-            // Set default time to 7:00 PM (19:00) when opening form
-            const now = new Date();
-            const today = now.toISOString().split('T')[0];
-            setFormData({
-              date: today,
-              time: '19:00',
-              homeTeamId: '',
-              awayTeamId: '',
-              division: 'A',
-              homeGoalie: '',
-              awayGoalie: '',
-              referee: '',
-              venue: '',
-              homeScore: '',
-              awayScore: '',
-              homeEmptyNetGoals: '',
-              awayEmptyNetGoals: ''
-            });
-            setShowModal(true);
-          }}
+          onClick={() => router.push('/admin/games/new')}
           className="w-full sm:w-auto bg-[#e9ca8a] text-black px-4 sm:px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold shadow-lg hover:shadow-xl text-sm sm:text-base"
         >
           + Add New Game
@@ -1143,7 +1125,7 @@ export default function GamesPage() {
                     <td className="px-3 sm:px-6 py-4">
                       <div className="flex flex-row gap-4 items-center justify-center">
                         <button
-                          onClick={() => handleEdit(game)}
+                          onClick={() => router.push(`/admin/games/${game.id}/edit`)}
                           className="text-black hover:opacity-60 font-semibold transition text-sm sm:text-base whitespace-nowrap"
                         >
                           ✏️ Edit

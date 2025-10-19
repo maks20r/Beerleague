@@ -1,0 +1,925 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { addGame, getTeams, getPlayers, getGoalies, updateTeamStandings, updatePlayerStatsFromGame, updateGoalieStatsFromGame } from '@/lib/db';
+import { Team, Player, Goalie } from '@/types';
+
+export default function NewGamePage() {
+  const router = useRouter();
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [goalies, setGoalies] = useState<Goalie[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'results'>('overview');
+  const [showEmptyNetGoals, setShowEmptyNetGoals] = useState(false);
+
+  const [formData, setFormData] = useState({
+    date: new Date().toISOString().split('T')[0],
+    time: '19:00',
+    homeTeamId: '',
+    awayTeamId: '',
+    division: 'A' as 'A' | 'B',
+    homeGoalie: '',
+    awayGoalie: '',
+    referee: '',
+    venue: '',
+    homeScore: '',
+    awayScore: '',
+    homeEmptyNetGoals: '',
+    awayEmptyNetGoals: '',
+    shootout: false
+  });
+
+  const [resultsData, setResultsData] = useState({
+    homeShots: '',
+    awayShots: '',
+    homeGoals: [] as Array<{
+      scorer: string;
+      assist1: string;
+      assist2: string;
+      time: string;
+    }>,
+    awayGoals: [] as Array<{
+      scorer: string;
+      assist1: string;
+      assist2: string;
+      time: string;
+    }>,
+    homePenalties: [] as Array<{
+      player: string;
+      infraction: string;
+      minutes: string;
+    }>,
+    awayPenalties: [] as Array<{
+      player: string;
+      infraction: string;
+      minutes: string;
+    }>
+  });
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [teamsData, playersData, goaliesData] = await Promise.all([
+        getTeams(),
+        getPlayers(),
+        getGoalies()
+      ]);
+      setTeams(teamsData);
+      setPlayers(playersData);
+      setGoalies(goaliesData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSaving(true);
+
+    try {
+      const gameDate = new Date(`${formData.date}T${formData.time}`);
+      const homeScore = formData.homeScore !== '' ? parseInt(formData.homeScore) : undefined;
+      const awayScore = formData.awayScore !== '' ? parseInt(formData.awayScore) : undefined;
+      const gameStatus = (homeScore !== undefined && awayScore !== undefined) ? 'completed' : 'scheduled';
+
+      const gameData = {
+        date: gameDate,
+        homeTeamId: formData.homeTeamId,
+        awayTeamId: formData.awayTeamId,
+        division: formData.division,
+        homeGoalie: formData.homeGoalie,
+        awayGoalie: formData.awayGoalie,
+        referee: formData.referee,
+        venue: formData.venue,
+        homeScore,
+        awayScore,
+        homeEmptyNetGoals: formData.homeEmptyNetGoals !== '' ? parseInt(formData.homeEmptyNetGoals) : undefined,
+        awayEmptyNetGoals: formData.awayEmptyNetGoals !== '' ? parseInt(formData.awayEmptyNetGoals) : undefined,
+        shootout: formData.shootout,
+        status: gameStatus,
+        homeShots: resultsData.homeShots !== '' ? parseInt(resultsData.homeShots) : undefined,
+        awayShots: resultsData.awayShots !== '' ? parseInt(resultsData.awayShots) : undefined,
+        homeGoals: resultsData.homeGoals,
+        awayGoals: resultsData.awayGoals,
+        homePenalties: resultsData.homePenalties,
+        awayPenalties: resultsData.awayPenalties
+      };
+
+      await addGame(gameData);
+
+      // Update team standings if game is completed
+      if (gameStatus === 'completed' && homeScore !== undefined && awayScore !== undefined) {
+        await updateTeamStandings(formData.homeTeamId, formData.awayTeamId, homeScore, awayScore, formData.shootout);
+      }
+
+      router.push('/admin/games');
+    } catch (error) {
+      console.error('Error creating game:', error);
+      alert('Error creating game. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const addGoal = (team: 'home' | 'away') => {
+    const newGoal = { scorer: '', assist1: '', assist2: '', time: '' };
+    if (team === 'home') {
+      setResultsData({ ...resultsData, homeGoals: [...resultsData.homeGoals, newGoal] });
+    } else {
+      setResultsData({ ...resultsData, awayGoals: [...resultsData.awayGoals, newGoal] });
+    }
+  };
+
+  const removeGoal = (team: 'home' | 'away', index: number) => {
+    if (team === 'home') {
+      setResultsData({ ...resultsData, homeGoals: resultsData.homeGoals.filter((_, i) => i !== index) });
+    } else {
+      setResultsData({ ...resultsData, awayGoals: resultsData.awayGoals.filter((_, i) => i !== index) });
+    }
+  };
+
+  const updateGoal = (team: 'home' | 'away', index: number, field: string, value: string) => {
+    if (team === 'home') {
+      const updated = [...resultsData.homeGoals];
+      updated[index] = { ...updated[index], [field]: value };
+      setResultsData({ ...resultsData, homeGoals: updated });
+    } else {
+      const updated = [...resultsData.awayGoals];
+      updated[index] = { ...updated[index], [field]: value };
+      setResultsData({ ...resultsData, awayGoals: updated });
+    }
+  };
+
+  const addPenalty = (team: 'home' | 'away') => {
+    const newPenalty = { player: '', infraction: '', minutes: '' };
+    if (team === 'home') {
+      setResultsData({ ...resultsData, homePenalties: [...resultsData.homePenalties, newPenalty] });
+    } else {
+      setResultsData({ ...resultsData, awayPenalties: [...resultsData.awayPenalties, newPenalty] });
+    }
+  };
+
+  const removePenalty = (team: 'home' | 'away', index: number) => {
+    if (team === 'home') {
+      setResultsData({ ...resultsData, homePenalties: resultsData.homePenalties.filter((_, i) => i !== index) });
+    } else {
+      setResultsData({ ...resultsData, awayPenalties: resultsData.awayPenalties.filter((_, i) => i !== index) });
+    }
+  };
+
+  const updatePenalty = (team: 'home' | 'away', index: number, field: string, value: string) => {
+    if (team === 'home') {
+      const updated = [...resultsData.homePenalties];
+      updated[index] = { ...updated[index], [field]: value };
+      setResultsData({ ...resultsData, homePenalties: updated });
+    } else {
+      const updated = [...resultsData.awayPenalties];
+      updated[index] = { ...updated[index], [field]: value };
+      setResultsData({ ...resultsData, awayPenalties: updated });
+    }
+  };
+
+  const getTeamPlayers = (teamId: string) => {
+    return players.filter(p => p.teamId === teamId && p.position !== 'G');
+  };
+
+  const getTeamGoalies = (teamId: string) => {
+    return goalies.filter(g => g.teamId === teamId);
+  };
+
+  if (loading) {
+    return <div className="text-center py-12">Loading...</div>;
+  }
+
+  const homeTeamPlayers = getTeamPlayers(formData.homeTeamId);
+  const awayTeamPlayers = getTeamPlayers(formData.awayTeamId);
+  const homeTeamGoalies = getTeamGoalies(formData.homeTeamId);
+  const awayTeamGoalies = getTeamGoalies(formData.awayTeamId);
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
+      <div className="max-w-4xl mx-auto p-4 sm:p-8">
+        <div className="mb-6">
+          <button
+            onClick={() => router.push('/admin/games')}
+            className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 mb-4"
+          >
+            ← Back to Games
+          </button>
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">Add New Game</h1>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+          <button
+            type="button"
+            onClick={() => setActiveTab('overview')}
+            className={`px-6 sm:px-12 py-3 sm:py-4 font-semibold text-base sm:text-lg transition-all rounded-lg ${
+              activeTab === 'overview'
+                ? 'bg-[#e9ca8a] text-black shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Game Overview
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab('results')}
+            className={`px-6 sm:px-12 py-3 sm:py-4 font-semibold text-base sm:text-lg transition-all rounded-lg ${
+              activeTab === 'results'
+                ? 'bg-[#e9ca8a] text-black shadow-lg'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            Game Results
+          </button>
+        </div>
+
+        <form id="game-form" onSubmit={handleSubmit} className="space-y-6 overflow-x-hidden">
+          {/* Overview Tab */}
+          {activeTab === 'overview' && (
+            <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
+
+              {/* Date and Time Section */}
+              <div className="mb-8 relative">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Date & Time</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Game Date *
+                    </label>
+                    <input
+                      type="date"
+                      value={formData.date}
+                      onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                      required
+                      className="w-full max-w-full box-border px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Game Time *
+                    </label>
+                    <input
+                      type="time"
+                      value={formData.time}
+                      onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                      required
+                      step="900"
+                      className="w-full max-w-full box-border px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="HH:MM"
+                    />
+                    <p className="text-xs text-gray-600 mt-1">Use 24-hour format (e.g., 19:00 for 7:00 PM)</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Teams Section */}
+              <div className="mb-8 relative">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Teams</h4>
+
+                {/* Division Selection */}
+                <div className="mb-6">
+                  <label className="block text-sm font-bold text-gray-800 mb-4 uppercase tracking-wide">
+                    Select Division *
+                  </label>
+                  <div className="grid grid-cols-2 gap-3 sm:gap-6">
+                    <label className={`relative flex flex-col items-center justify-center px-4 sm:px-8 py-4 sm:py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'A' ? 'bg-gradient-to-br from-[#e9ca8a] to-[#d4b574] border-[#e9ca8a] text-black shadow-lg' : 'bg-white border-gray-300 text-gray-700 hover:border-[#e9ca8a] hover:shadow-lg'}`}>
+                      <input
+                        type="radio"
+                        name="division"
+                        value="A"
+                        checked={formData.division === 'A'}
+                        onChange={(e) => setFormData({ ...formData, division: e.target.value as 'A' | 'B', homeTeamId: '', awayTeamId: '' })}
+                        className="sr-only"
+                      />
+                      <span className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2">A</span>
+                      <span className="font-bold text-xs sm:text-sm uppercase tracking-wider">Division A</span>
+                    </label>
+                    <label className={`relative flex flex-col items-center justify-center px-4 sm:px-8 py-4 sm:py-6 rounded-xl cursor-pointer border-3 transition-all duration-300 ${formData.division === 'B' ? 'bg-gradient-to-br from-black to-gray-800 border-black text-[#e9ca8a] shadow-lg' : 'bg-white border-gray-300 text-gray-700 hover:border-black hover:shadow-lg'}`}>
+                      <input
+                        type="radio"
+                        name="division"
+                        value="B"
+                        checked={formData.division === 'B'}
+                        onChange={(e) => setFormData({ ...formData, division: e.target.value as 'A' | 'B', homeTeamId: '', awayTeamId: '' })}
+                        className="sr-only"
+                      />
+                      <span className="text-2xl sm:text-4xl font-black mb-1 sm:mb-2">B</span>
+                      <span className="font-bold text-xs sm:text-sm uppercase tracking-wider">Division B</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Home Team *
+                    </label>
+                    <select
+                      value={formData.homeTeamId}
+                      onChange={(e) => setFormData({ ...formData, homeTeamId: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                    >
+                      <option value="">Select home team</option>
+                      {teams.filter(t => t.division === formData.division).map(team => (
+                        <option key={team.id} value={team.id}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Away Team *
+                    </label>
+                    <select
+                      value={formData.awayTeamId}
+                      onChange={(e) => setFormData({ ...formData, awayTeamId: e.target.value })}
+                      required
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                    >
+                      <option value="">Select away team</option>
+                      {teams.filter(t => t.division === formData.division && t.id !== formData.homeTeamId).map(team => (
+                        <option key={team.id} value={team.id}>{team.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Additional Details Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Additional Details</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Venue
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.venue}
+                      onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="Enter venue name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Referee
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.referee}
+                      onChange={(e) => setFormData({ ...formData, referee: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="Enter referee name"
+                    />
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          )}
+
+          {/* Results Tab */}
+          {activeTab === 'results' && (
+            <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden">
+
+              {/* Scores Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Final Score</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Home Score {formData.homeTeamId && `(${teams.find(t => t.id === formData.homeTeamId)?.name})`}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.homeScore}
+                      onChange={(e) => setFormData({ ...formData, homeScore: e.target.value })}
+                      min="0"
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Away Score {formData.awayTeamId && `(${teams.find(t => t.id === formData.awayTeamId)?.name})`}
+                    </label>
+                    <input
+                      type="number"
+                      value={formData.awayScore}
+                      onChange={(e) => setFormData({ ...formData, awayScore: e.target.value })}
+                      min="0"
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Goalies Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Goalies</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Home Goalie
+                    </label>
+                    <select
+                      value={formData.homeGoalie}
+                      onChange={(e) => setFormData({ ...formData, homeGoalie: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                    >
+                      <option value="">Select goalie</option>
+                      {homeTeamGoalies.map(goalie => (
+                        <option key={goalie.id} value={goalie.name}>{goalie.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Away Goalie
+                    </label>
+                    <select
+                      value={formData.awayGoalie}
+                      onChange={(e) => setFormData({ ...formData, awayGoalie: e.target.value })}
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                    >
+                      <option value="">Select goalie</option>
+                      {awayTeamGoalies.map(goalie => (
+                        <option key={goalie.id} value={goalie.name}>{goalie.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Shots Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Shots on Goal</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Home Shots
+                    </label>
+                    <input
+                      type="number"
+                      value={resultsData.homeShots}
+                      onChange={(e) => setResultsData({ ...resultsData, homeShots: e.target.value })}
+                      min="0"
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="0"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Away Shots
+                    </label>
+                    <input
+                      type="number"
+                      value={resultsData.awayShots}
+                      onChange={(e) => setResultsData({ ...resultsData, awayShots: e.target.value })}
+                      min="0"
+                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                      placeholder="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Goals Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Goals</h4>
+
+                {/* Home Team Goals */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <h5 className="text-lg font-semibold text-gray-800">
+                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Goals
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => addGoal('home')}
+                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
+                    >
+                      + Add Goal
+                    </button>
+                  </div>
+                  {resultsData.homeGoals.map((goal, index) => (
+                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Scorer</label>
+                          <select
+                            value={goal.scorer}
+                            onChange={(e) => updateGoal('home', index, 'scorer', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select scorer</option>
+                            {homeTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Time</label>
+                          <input
+                            type="text"
+                            value={goal.time}
+                            onChange={(e) => updateGoal('home', index, 'time', e.target.value)}
+                            placeholder="00:00"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 1</label>
+                          <select
+                            value={goal.assist1}
+                            onChange={(e) => updateGoal('home', index, 'assist1', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select assist</option>
+                            {homeTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 2</label>
+                          <select
+                            value={goal.assist2}
+                            onChange={(e) => updateGoal('home', index, 'assist2', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select assist</option>
+                            {homeTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeGoal('home', index)}
+                        className="text-red-600 hover:text-red-800 text-sm font-bold"
+                      >
+                        Remove Goal
+                      </button>
+                    </div>
+                  ))}
+                  {resultsData.homeGoals.length === 0 && (
+                    <p className="text-gray-500 text-sm italic">No goals added yet</p>
+                  )}
+                </div>
+
+                {/* Away Team Goals */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <h5 className="text-lg font-semibold text-gray-800">
+                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Goals
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => addGoal('away')}
+                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
+                    >
+                      + Add Goal
+                    </button>
+                  </div>
+                  {resultsData.awayGoals.map((goal, index) => (
+                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Scorer</label>
+                          <select
+                            value={goal.scorer}
+                            onChange={(e) => updateGoal('away', index, 'scorer', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select scorer</option>
+                            {awayTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Time</label>
+                          <input
+                            type="text"
+                            value={goal.time}
+                            onChange={(e) => updateGoal('away', index, 'time', e.target.value)}
+                            placeholder="00:00"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 1</label>
+                          <select
+                            value={goal.assist1}
+                            onChange={(e) => updateGoal('away', index, 'assist1', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select assist</option>
+                            {awayTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 2</label>
+                          <select
+                            value={goal.assist2}
+                            onChange={(e) => updateGoal('away', index, 'assist2', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select assist</option>
+                            {awayTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removeGoal('away', index)}
+                        className="text-red-600 hover:text-red-800 text-sm font-bold"
+                      >
+                        Remove Goal
+                      </button>
+                    </div>
+                  ))}
+                  {resultsData.awayGoals.length === 0 && (
+                    <p className="text-gray-500 text-sm italic">No goals added yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Penalties Section */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Penalties</h4>
+
+                {/* Home Team Penalties */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <h5 className="text-lg font-semibold text-gray-800">
+                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Penalties
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => addPenalty('home')}
+                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
+                    >
+                      + Add Penalty
+                    </button>
+                  </div>
+                  {resultsData.homePenalties.map((penalty, index) => (
+                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
+                          <select
+                            value={penalty.player}
+                            onChange={(e) => updatePenalty('home', index, 'player', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select player</option>
+                            {homeTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
+                          <input
+                            type="text"
+                            value={penalty.infraction}
+                            onChange={(e) => updatePenalty('home', index, 'infraction', e.target.value)}
+                            placeholder="e.g., Tripping"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
+                          <input
+                            type="number"
+                            value={penalty.minutes}
+                            onChange={(e) => updatePenalty('home', index, 'minutes', e.target.value)}
+                            placeholder="2"
+                            min="0"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePenalty('home', index)}
+                        className="text-red-600 hover:text-red-800 text-sm font-bold"
+                      >
+                        Remove Penalty
+                      </button>
+                    </div>
+                  ))}
+                  {resultsData.homePenalties.length === 0 && (
+                    <p className="text-gray-500 text-sm italic">No penalties added yet</p>
+                  )}
+                </div>
+
+                {/* Away Team Penalties */}
+                <div className="mb-6">
+                  <div className="flex justify-between items-center mb-3">
+                    <h5 className="text-lg font-semibold text-gray-800">
+                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Penalties
+                    </h5>
+                    <button
+                      type="button"
+                      onClick={() => addPenalty('away')}
+                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
+                    >
+                      + Add Penalty
+                    </button>
+                  </div>
+                  {resultsData.awayPenalties.map((penalty, index) => (
+                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
+                          <select
+                            value={penalty.player}
+                            onChange={(e) => updatePenalty('away', index, 'player', e.target.value)}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          >
+                            <option value="">Select player</option>
+                            {awayTeamPlayers.map(player => (
+                              <option key={player.id} value={player.name}>{player.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
+                          <input
+                            type="text"
+                            value={penalty.infraction}
+                            onChange={(e) => updatePenalty('away', index, 'infraction', e.target.value)}
+                            placeholder="e.g., Tripping"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
+                          <input
+                            type="number"
+                            value={penalty.minutes}
+                            onChange={(e) => updatePenalty('away', index, 'minutes', e.target.value)}
+                            placeholder="2"
+                            min="0"
+                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
+                          />
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => removePenalty('away', index)}
+                        className="text-red-600 hover:text-red-800 text-sm font-bold"
+                      >
+                        Remove Penalty
+                      </button>
+                    </div>
+                  ))}
+                  {resultsData.awayPenalties.length === 0 && (
+                    <p className="text-gray-500 text-sm italic">No penalties added yet</p>
+                  )}
+                </div>
+              </div>
+
+              {/* Separator */}
+              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
+
+              {/* Special Options */}
+              <div className="mb-8">
+                <h4 className="text-xl font-bold text-gray-900 mb-4">Special Options</h4>
+
+                {/* Shootout Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="shootout"
+                    checked={formData.shootout}
+                    onChange={(e) => setFormData({ ...formData, shootout: e.target.checked })}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="shootout" className="ml-3 text-sm font-semibold text-gray-700">
+                    Game decided by shootout
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="emptyNetGoals"
+                    checked={showEmptyNetGoals}
+                    onChange={(e) => setShowEmptyNetGoals(e.target.checked)}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="emptyNetGoals" className="ml-3 text-sm font-semibold text-gray-700">
+                    Track empty net goals
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Inputs */}
+                {showEmptyNetGoals && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Home Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.homeEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, homeEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Away Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.awayEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, awayEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          )}
+        </form>
+
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6">
+          <button
+            type="button"
+            onClick={() => router.push('/admin/games')}
+            className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-sm sm:text-base text-gray-700 hover:text-gray-900"
+          >
+            Cancel
+          </button>
+          <button
+            type="submit"
+            form="game-form"
+            disabled={saving}
+            className={`w-full sm:w-auto relative overflow-hidden flex items-center justify-center gap-2 px-8 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-500 font-bold text-sm sm:text-base tracking-wide uppercase ${
+              saving
+                ? 'bg-gray-100 text-gray-400 cursor-not-allowed border-2 border-gray-200'
+                : 'bg-[#e9ca8a] text-black border-2 border-[#e9ca8a] hover:bg-[#d4b574] hover:border-[#d4b574] hover:scale-105 hover:shadow-2xl'
+            }`}
+          >
+            {saving && (
+              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+            )}
+            <span>{saving ? 'Saving...' : 'Create Game'}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
