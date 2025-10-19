@@ -203,25 +203,10 @@ export default function RostersPage() {
 
       {/* Team Form */}
       {showTeamForm && (
-        <div className="fixed inset-0 bg-gray-50 z-50 overflow-y-auto">
-          <div className="min-h-screen">
-            <div className="bg-green-600 text-white px-8 py-6 shadow-md">
-              <div className="max-w-4xl mx-auto flex justify-between items-center">
-                <div>
-                  <h3 className="text-3xl font-bold">Add New Team</h3>
-                  <p className="text-green-100 mt-1">Create a new team</p>
-                </div>
-                <button
-                  onClick={resetTeamForm}
-                  className="bg-green-700 hover:bg-green-800 px-6 py-3 rounded-lg transition font-semibold"
-                >
-                  ← Back
-                </button>
-              </div>
-            </div>
-
-            <form onSubmit={handleSubmitTeam} className="max-w-4xl mx-auto p-8 space-y-6">
-              <div className="bg-white rounded-lg p-6 border border-gray-200 shadow space-y-4">
+        <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
+          <div className="min-h-screen pt-24 sm:pt-32">
+            <form id="team-form" onSubmit={handleSubmitTeam} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
+              <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-4">
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
                     Team Name *
@@ -250,23 +235,25 @@ export default function RostersPage() {
                   </select>
                 </div>
               </div>
-
-              <div className="flex gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={resetTeamForm}
-                  className="px-8 py-4 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition font-semibold"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-600 text-white px-8 py-4 rounded-lg hover:bg-green-700 transition font-bold text-lg"
-                >
-                  Create Team
-                </button>
-              </div>
             </form>
+
+            {/* Action Buttons */}
+            <div className="max-w-4xl mx-auto px-4 sm:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
+              <button
+                type="button"
+                onClick={resetTeamForm}
+                className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-sm sm:text-base text-gray-700 hover:text-gray-900"
+              >
+                Close
+              </button>
+              <button
+                type="submit"
+                form="team-form"
+                className="w-full sm:w-auto relative overflow-hidden flex items-center justify-center gap-2 px-8 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-500 font-bold text-sm sm:text-base tracking-wide uppercase bg-[#e9ca8a] text-black border-2 border-[#e9ca8a] hover:bg-[#d4b574] hover:border-[#d4b574] hover:scale-105 hover:shadow-2xl"
+              >
+                <span>Create Team</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
@@ -345,27 +332,10 @@ export default function RostersPage() {
 
           {/* Player Form */}
           {showPlayerForm && (
-            <div className="fixed inset-0 bg-gray-50 z-50 overflow-y-auto">
-              <div className="min-h-screen">
-                <div className="bg-[#e9ca8a] text-black px-8 py-6 shadow-md">
-                  <div className="max-w-4xl mx-auto flex justify-between items-center">
-                    <div>
-                      <h3 className="text-3xl font-bold">
-                        {editingPlayer ? 'Edit Player' : 'Add New Player'}
-                      </h3>
-                      <p className="text-[#faf6ee] mt-1">Fill in the player details</p>
-                    </div>
-                    <button
-                      onClick={resetPlayerForm}
-                      className="bg-[#d4b577] hover:bg-[#c9a865] px-6 py-3 rounded-lg transition font-semibold"
-                    >
-                      ← Back
-                    </button>
-                  </div>
-                </div>
-
-                <form onSubmit={handleSubmitPlayer} className="max-w-4xl mx-auto p-8 space-y-6">
-                  <div className="bg-white rounded-lg p-6 border border-gray-200 shadow space-y-4">
+            <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
+              <div className="min-h-screen pt-24 sm:pt-32">
+                <form id="player-form" onSubmit={handleSubmitPlayer} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
+                  <div className="p-4 sm:p-10 bg-white rounded-2xl border-2 border-black shadow-[0_4px_20px_rgba(233,202,138,0.15),0_8px_40px_rgba(0,0,0,0.1)] relative overflow-hidden space-y-4">
                     <div>
                       <label className="block text-sm font-semibold text-gray-700 mb-2">
                         Player Name *
@@ -380,7 +350,7 @@ export default function RostersPage() {
                       />
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Jersey Number *
@@ -425,7 +395,7 @@ export default function RostersPage() {
                       </div>
                     </div>
 
-                    <div className="grid md:grid-cols-3 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 mb-2">
                           Goals
@@ -464,23 +434,25 @@ export default function RostersPage() {
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex gap-3 justify-end">
-                    <button
-                      type="button"
-                      onClick={resetPlayerForm}
-                      className="px-8 py-4 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition font-semibold"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="bg-[#e9ca8a] text-black px-8 py-4 rounded-lg hover:bg-[#d4b577] transition font-bold text-lg"
-                    >
-                      {editingPlayer ? 'Update Player' : 'Add Player'}
-                    </button>
-                  </div>
                 </form>
+
+                {/* Action Buttons */}
+                <div className="max-w-4xl mx-auto px-4 sm:px-8 pb-6 sm:pb-8 flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end">
+                  <button
+                    type="button"
+                    onClick={resetPlayerForm}
+                    className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-sm sm:text-base text-gray-700 hover:text-gray-900"
+                  >
+                    Close
+                  </button>
+                  <button
+                    type="submit"
+                    form="player-form"
+                    className="w-full sm:w-auto relative overflow-hidden flex items-center justify-center gap-2 px-8 sm:px-12 py-3 sm:py-4 rounded-lg transition-all duration-500 font-bold text-sm sm:text-base tracking-wide uppercase bg-[#e9ca8a] text-black border-2 border-[#e9ca8a] hover:bg-[#d4b574] hover:border-[#d4b574] hover:scale-105 hover:shadow-2xl"
+                  >
+                    <span>{editingPlayer ? 'Update Player' : 'Add Player'}</span>
+                  </button>
+                </div>
               </div>
             </div>
           )}
