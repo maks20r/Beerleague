@@ -728,6 +728,11 @@ export const updateGoalieStatsFromGame = async (
   }
 ) => {
   try {
+    console.log('=== updateGoalieStatsFromGame called ===');
+    console.log('GameID:', gameId);
+    console.log('Game Data:', gameData);
+    console.log('Old Game Data:', oldGameData);
+
     // Get team IDs
     const [homeTeam, awayTeam] = await Promise.all([
       getTeamByName(gameData.homeTeamId),
@@ -738,6 +743,8 @@ export const updateGoalieStatsFromGame = async (
       console.error('Teams not found:', gameData.homeTeamId, gameData.awayTeamId);
       return;
     }
+
+    console.log('Teams found - Home:', homeTeam.name, 'Away:', awayTeam.name);
 
     // If we have old game data, first subtract the old stats
     if (oldGameData) {
@@ -751,9 +758,9 @@ export const updateGoalieStatsFromGame = async (
           const oldEmptyNetGoals = oldGameData.awayEmptyNetGoals || 0;
           const oldGoalsAgainst = oldGameData.awayScore - oldEmptyNetGoals;
           const oldSaves = oldShotsAgainst - oldGoalsAgainst;
-          const totalShots = homeGoalie.totalShots - oldShotsAgainst;
-          const totalGoalsAllowed = homeGoalie.goalsAllowed - oldGoalsAgainst;
-          const totalSaves = homeGoalie.saves - oldSaves;
+          const totalShots = Math.max(0, homeGoalie.totalShots - oldShotsAgainst);
+          const totalGoalsAllowed = Math.max(0, homeGoalie.goalsAllowed - oldGoalsAgainst);
+          const totalSaves = Math.max(0, homeGoalie.saves - oldSaves);
           const savePercentage = totalShots > 0 ? (totalSaves / totalShots) * 100 : 0;
 
           await updateGoalie(homeGoalie.id, {
@@ -777,9 +784,9 @@ export const updateGoalieStatsFromGame = async (
           const oldEmptyNetGoals = oldGameData.homeEmptyNetGoals || 0;
           const oldGoalsAgainst = oldGameData.homeScore - oldEmptyNetGoals;
           const oldSaves = oldShotsAgainst - oldGoalsAgainst;
-          const totalShots = awayGoalie.totalShots - oldShotsAgainst;
-          const totalGoalsAllowed = awayGoalie.goalsAllowed - oldGoalsAgainst;
-          const totalSaves = awayGoalie.saves - oldSaves;
+          const totalShots = Math.max(0, awayGoalie.totalShots - oldShotsAgainst);
+          const totalGoalsAllowed = Math.max(0, awayGoalie.goalsAllowed - oldGoalsAgainst);
+          const totalSaves = Math.max(0, awayGoalie.saves - oldSaves);
           const savePercentage = totalShots > 0 ? (totalSaves / totalShots) * 100 : 0;
 
           await updateGoalie(awayGoalie.id, {
@@ -799,6 +806,13 @@ export const updateGoalieStatsFromGame = async (
       const homeGoalie = await getGoalieByName(gameData.homeGoalie);
 
       if (homeGoalie) {
+        console.log(`Current ${gameData.homeGoalie} stats:`, {
+          totalShots: homeGoalie.totalShots,
+          saves: homeGoalie.saves,
+          goalsAllowed: homeGoalie.goalsAllowed,
+          savePercentage: homeGoalie.savePercentage
+        });
+
         const shotsAgainst = gameData.awayShots;
         // Subtract empty net goals from goals against (home goalie faces away team)
         const emptyNetGoals = gameData.awayEmptyNetGoals || 0;
@@ -808,6 +822,10 @@ export const updateGoalieStatsFromGame = async (
         const totalGoalsAllowed = homeGoalie.goalsAllowed + goalsAgainst;
         const totalSaves = homeGoalie.saves + saves;
         const savePercentage = totalShots > 0 ? (totalSaves / totalShots) * 100 : 0;
+
+        console.log(`Calculating: shots=${shotsAgainst}, goals=${goalsAgainst}, saves=${saves}`);
+        console.log(`New totals: totalShots=${totalShots}, totalSaves=${totalSaves}, totalGoals=${totalGoalsAllowed}`);
+        console.log(`Save %: ${totalSaves} / ${totalShots} * 100 = ${savePercentage}`);
 
         await updateGoalie(homeGoalie.id, {
           // Only increment games played if this is a new game (no old data)

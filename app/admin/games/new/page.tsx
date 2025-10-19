@@ -113,11 +113,38 @@ export default function NewGamePage() {
         awayPenalties: resultsData.awayPenalties
       };
 
-      await addGame(gameData);
+      const docRef = await addGame(gameData);
+      const gameId = docRef.id;
 
       // Update team standings if game is completed
       if (gameStatus === 'completed' && homeScore !== undefined && awayScore !== undefined) {
-        await updateTeamStandings(formData.homeTeamId, formData.awayTeamId, homeScore, awayScore, formData.shootout);
+        await updateTeamStandings(gameId);
+
+        // Update player stats from game results
+        await updatePlayerStatsFromGame(gameId, {
+          homeTeamId: formData.homeTeamId,
+          awayTeamId: formData.awayTeamId,
+          homeGoals: resultsData.homeGoals,
+          awayGoals: resultsData.awayGoals,
+          homePenalties: resultsData.homePenalties,
+          awayPenalties: resultsData.awayPenalties
+        });
+
+        // Update goalie stats from game results
+        if (formData.homeGoalie || formData.awayGoalie) {
+          await updateGoalieStatsFromGame(gameId, {
+            homeTeamId: formData.homeTeamId,
+            awayTeamId: formData.awayTeamId,
+            homeGoalie: formData.homeGoalie,
+            awayGoalie: formData.awayGoalie,
+            homeScore: homeScore,
+            awayScore: awayScore,
+            homeShots: resultsData.homeShots ? parseInt(resultsData.homeShots) : 0,
+            awayShots: resultsData.awayShots ? parseInt(resultsData.awayShots) : 0,
+            homeEmptyNetGoals: formData.homeEmptyNetGoals !== '' ? parseInt(formData.homeEmptyNetGoals) : 0,
+            awayEmptyNetGoals: formData.awayEmptyNetGoals !== '' ? parseInt(formData.awayEmptyNetGoals) : 0
+          });
+        }
       }
 
       router.push('/admin/games');
@@ -187,12 +214,15 @@ export default function NewGamePage() {
     }
   };
 
-  const getTeamPlayers = (teamId: string) => {
-    return players.filter(p => p.teamId === teamId && p.position !== 'G');
+  const getTeamPlayers = (teamName: string) => {
+    const team = teams.find(t => t.name === teamName);
+    if (!team) return [];
+    return players.filter(p => p.teamId === team.id);
   };
 
-  const getTeamGoalies = (teamId: string) => {
-    return goalies.filter(g => g.teamId === teamId);
+  const getTeamGoalies = (teamName: string) => {
+    // Return all goalies since they can play for any team
+    return goalies;
   };
 
   if (loading) {
@@ -335,7 +365,7 @@ export default function NewGamePage() {
                     >
                       <option value="">Select home team</option>
                       {teams.filter(t => t.division === formData.division).map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                        <option key={team.id} value={team.name}>{team.name}</option>
                       ))}
                     </select>
                   </div>
@@ -350,8 +380,8 @@ export default function NewGamePage() {
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     >
                       <option value="">Select away team</option>
-                      {teams.filter(t => t.division === formData.division && t.id !== formData.homeTeamId).map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                      {teams.filter(t => t.division === formData.division && t.name !== formData.homeTeamId).map(team => (
+                        <option key={team.id} value={team.name}>{team.name}</option>
                       ))}
                     </select>
                   </div>
@@ -399,10 +429,10 @@ export default function NewGamePage() {
               {/* Scores Section */}
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Final Score</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Home Score {formData.homeTeamId && `(${teams.find(t => t.id === formData.homeTeamId)?.name})`}
+                      Home Score {formData.homeTeamId && `(${formData.homeTeamId})`}
                     </label>
                     <input
                       type="number"
@@ -415,7 +445,7 @@ export default function NewGamePage() {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Away Score {formData.awayTeamId && `(${teams.find(t => t.id === formData.awayTeamId)?.name})`}
+                      Away Score {formData.awayTeamId && `(${formData.awayTeamId})`}
                     </label>
                     <input
                       type="number"
@@ -427,6 +457,67 @@ export default function NewGamePage() {
                     />
                   </div>
                 </div>
+
+                {/* Special Options */}
+                {/* Shootout Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="shootout"
+                    checked={formData.shootout}
+                    onChange={(e) => setFormData({ ...formData, shootout: e.target.checked })}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="shootout" className="ml-3 text-sm font-semibold text-gray-700">
+                    Game decided by shootout
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="emptyNetGoals"
+                    checked={showEmptyNetGoals}
+                    onChange={(e) => setShowEmptyNetGoals(e.target.checked)}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="emptyNetGoals" className="ml-3 text-sm font-semibold text-gray-700">
+                    Track empty net goals
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Inputs */}
+                {showEmptyNetGoals && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Home Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.homeEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, homeEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Away Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.awayEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, awayEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Separator */}
@@ -516,7 +607,7 @@ export default function NewGamePage() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Goals
+                      {formData.homeTeamId || 'Home Team'} Goals
                     </h5>
                     <button
                       type="button"
@@ -599,7 +690,7 @@ export default function NewGamePage() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Goals
+                      {formData.awayTeamId || 'Away Team'} Goals
                     </h5>
                     <button
                       type="button"
@@ -690,7 +781,7 @@ export default function NewGamePage() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Penalties
+                      {formData.homeTeamId || 'Home Team'} Penalties
                     </h5>
                     <button
                       type="button"
@@ -756,7 +847,7 @@ export default function NewGamePage() {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Penalties
+                      {formData.awayTeamId || 'Away Team'} Penalties
                     </h5>
                     <button
                       type="button"
@@ -817,74 +908,6 @@ export default function NewGamePage() {
                     <p className="text-gray-500 text-sm italic">No penalties added yet</p>
                   )}
                 </div>
-              </div>
-
-              {/* Separator */}
-              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
-
-              {/* Special Options */}
-              <div className="mb-8">
-                <h4 className="text-xl font-bold text-gray-900 mb-4">Special Options</h4>
-
-                {/* Shootout Toggle */}
-                <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id="shootout"
-                    checked={formData.shootout}
-                    onChange={(e) => setFormData({ ...formData, shootout: e.target.checked })}
-                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
-                  />
-                  <label htmlFor="shootout" className="ml-3 text-sm font-semibold text-gray-700">
-                    Game decided by shootout
-                  </label>
-                </div>
-
-                {/* Empty Net Goals Toggle */}
-                <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id="emptyNetGoals"
-                    checked={showEmptyNetGoals}
-                    onChange={(e) => setShowEmptyNetGoals(e.target.checked)}
-                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
-                  />
-                  <label htmlFor="emptyNetGoals" className="ml-3 text-sm font-semibold text-gray-700">
-                    Track empty net goals
-                  </label>
-                </div>
-
-                {/* Empty Net Goals Inputs */}
-                {showEmptyNetGoals && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Home Empty Net Goals
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.homeEmptyNetGoals}
-                        onChange={(e) => setFormData({ ...formData, homeEmptyNetGoals: e.target.value })}
-                        min="0"
-                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Away Empty Net Goals
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.awayEmptyNetGoals}
-                        onChange={(e) => setFormData({ ...formData, awayEmptyNetGoals: e.target.value })}
-                        min="0"
-                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
             </div>

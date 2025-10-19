@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { getGameById, updateGame, getTeams, getPlayers, getGoalies, updateTeamStandings } from '@/lib/db';
+import { getGameById, updateGame, getTeams, getPlayers, getGoalies, updateTeamStandings, updatePlayerStatsFromGame, updateGoalieStatsFromGame } from '@/lib/db';
 import { Game, Team, Player, Goalie } from '@/types';
 
 interface EditGameClientProps {
@@ -132,38 +132,95 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
 
     try {
       const gameDate = new Date(`${formData.date}T${formData.time}`);
-      const homeScore = formData.homeScore !== '' ? parseInt(formData.homeScore) : undefined;
-      const awayScore = formData.awayScore !== '' ? parseInt(formData.awayScore) : undefined;
-      const gameStatus = (homeScore !== undefined && awayScore !== undefined) ? 'completed' : 'scheduled';
+      const homeScore = formData.homeScore !== '' ? parseInt(formData.homeScore) : null;
+      const awayScore = formData.awayScore !== '' ? parseInt(formData.awayScore) : null;
+      const gameStatus = (homeScore !== null && awayScore !== null) ? 'completed' : 'scheduled';
 
-      const gameData = {
+      const gameData: any = {
         date: gameDate,
         homeTeamId: formData.homeTeamId,
         awayTeamId: formData.awayTeamId,
         division: formData.division,
-        homeGoalie: formData.homeGoalie,
-        awayGoalie: formData.awayGoalie,
-        referee: formData.referee,
-        venue: formData.venue,
-        homeScore,
-        awayScore,
-        homeEmptyNetGoals: formData.homeEmptyNetGoals !== '' ? parseInt(formData.homeEmptyNetGoals) : undefined,
-        awayEmptyNetGoals: formData.awayEmptyNetGoals !== '' ? parseInt(formData.awayEmptyNetGoals) : undefined,
+        homeGoalie: formData.homeGoalie || '',
+        awayGoalie: formData.awayGoalie || '',
+        referee: formData.referee || '',
+        venue: formData.venue || '',
         shootout: formData.shootout,
         status: gameStatus,
-        homeShots: resultsData.homeShots !== '' ? parseInt(resultsData.homeShots) : undefined,
-        awayShots: resultsData.awayShots !== '' ? parseInt(resultsData.awayShots) : undefined,
         homeGoals: resultsData.homeGoals,
         awayGoals: resultsData.awayGoals,
         homePenalties: resultsData.homePenalties,
         awayPenalties: resultsData.awayPenalties
       };
 
+      // Only add fields if they have values
+      if (homeScore !== null) gameData.homeScore = homeScore;
+      if (awayScore !== null) gameData.awayScore = awayScore;
+      if (formData.homeEmptyNetGoals !== '') gameData.homeEmptyNetGoals = parseInt(formData.homeEmptyNetGoals);
+      if (formData.awayEmptyNetGoals !== '') gameData.awayEmptyNetGoals = parseInt(formData.awayEmptyNetGoals);
+      if (resultsData.homeShots !== '') gameData.homeShots = parseInt(resultsData.homeShots);
+      if (resultsData.awayShots !== '') gameData.awayShots = parseInt(resultsData.awayShots);
+
       await updateGame(gameId, gameData);
 
       // Update team standings if game is completed
-      if (gameStatus === 'completed' && homeScore !== undefined && awayScore !== undefined) {
-        await updateTeamStandings(formData.homeTeamId, formData.awayTeamId, homeScore, awayScore, formData.shootout);
+      if (gameStatus === 'completed' && homeScore !== null && awayScore !== null) {
+        // Pass the old game data so standings can be properly updated
+        const oldGameData = game ? {
+          homeScore: game.homeScore,
+          awayScore: game.awayScore,
+          shootout: game.shootout
+        } : undefined;
+        await updateTeamStandings(gameId, oldGameData);
+
+        // Prepare old game data for stats update
+        const oldPlayerGameData = game && game.homeScore !== undefined && game.awayScore !== undefined ? {
+          homeTeamId: game.homeTeamId,
+          awayTeamId: game.awayTeamId,
+          homeGoals: game.homeGoals || [],
+          awayGoals: game.awayGoals || [],
+          homePenalties: game.homePenalties || [],
+          awayPenalties: game.awayPenalties || []
+        } : undefined;
+
+        // Update player stats from game results
+        await updatePlayerStatsFromGame(gameId, {
+          homeTeamId: formData.homeTeamId,
+          awayTeamId: formData.awayTeamId,
+          homeGoals: resultsData.homeGoals,
+          awayGoals: resultsData.awayGoals,
+          homePenalties: resultsData.homePenalties,
+          awayPenalties: resultsData.awayPenalties
+        }, oldPlayerGameData);
+
+        // Update goalie stats from game results
+        if (formData.homeGoalie || formData.awayGoalie) {
+          const oldGoalieGameData = game && game.homeScore !== undefined && game.awayScore !== undefined ? {
+            homeTeamId: game.homeTeamId,
+            awayTeamId: game.awayTeamId,
+            homeGoalie: game.homeGoalie,
+            awayGoalie: game.awayGoalie,
+            homeScore: game.homeScore || 0,
+            awayScore: game.awayScore || 0,
+            homeShots: game.homeShots || 0,
+            awayShots: game.awayShots || 0,
+            homeEmptyNetGoals: game.homeEmptyNetGoals || 0,
+            awayEmptyNetGoals: game.awayEmptyNetGoals || 0
+          } : undefined;
+
+          await updateGoalieStatsFromGame(gameId, {
+            homeTeamId: formData.homeTeamId,
+            awayTeamId: formData.awayTeamId,
+            homeGoalie: formData.homeGoalie,
+            awayGoalie: formData.awayGoalie,
+            homeScore: homeScore,
+            awayScore: awayScore,
+            homeShots: resultsData.homeShots ? parseInt(resultsData.homeShots) : 0,
+            awayShots: resultsData.awayShots ? parseInt(resultsData.awayShots) : 0,
+            homeEmptyNetGoals: formData.homeEmptyNetGoals !== '' ? parseInt(formData.homeEmptyNetGoals) : 0,
+            awayEmptyNetGoals: formData.awayEmptyNetGoals !== '' ? parseInt(formData.awayEmptyNetGoals) : 0
+          }, oldGoalieGameData);
+        }
       }
 
       router.push('/admin/games');
@@ -233,12 +290,15 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     }
   };
 
-  const getTeamPlayers = (teamId: string) => {
-    return players.filter(p => p.teamId === teamId && p.position !== 'G');
+  const getTeamPlayers = (teamName: string) => {
+    const team = teams.find(t => t.name === teamName);
+    if (!team) return [];
+    return players.filter(p => p.teamId === team.id);
   };
 
-  const getTeamGoalies = (teamId: string) => {
-    return goalies.filter(g => g.teamId === teamId);
+  const getTeamGoalies = (teamName: string) => {
+    // Return all goalies since they can play for any team
+    return goalies;
   };
 
   if (loading) {
@@ -351,8 +411,8 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     >
                       <option value="">Select home team</option>
-                      {teams.map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                      {teams.filter(t => t.division === formData.division).map(team => (
+                        <option key={team.id} value={team.name}>{team.name}</option>
                       ))}
                     </select>
                   </div>
@@ -367,8 +427,8 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     >
                       <option value="">Select away team</option>
-                      {teams.filter(t => t.id !== formData.homeTeamId).map(team => (
-                        <option key={team.id} value={team.id}>{team.name}</option>
+                      {teams.filter(t => t.division === formData.division && t.name !== formData.homeTeamId).map(team => (
+                        <option key={team.id} value={team.name}>{team.name}</option>
                       ))}
                     </select>
                   </div>
@@ -416,10 +476,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
               {/* Scores Section */}
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Final Score</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Home Score {formData.homeTeamId && `(${teams.find(t => t.id === formData.homeTeamId)?.name})`}
+                      Home Score {formData.homeTeamId && `(${formData.homeTeamId})`}
                     </label>
                     <input
                       type="number"
@@ -432,7 +492,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                   </div>
                   <div>
                     <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Away Score {formData.awayTeamId && `(${teams.find(t => t.id === formData.awayTeamId)?.name})`}
+                      Away Score {formData.awayTeamId && `(${formData.awayTeamId})`}
                     </label>
                     <input
                       type="number"
@@ -444,6 +504,67 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     />
                   </div>
                 </div>
+
+                {/* Special Options */}
+                {/* Shootout Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="shootout"
+                    checked={formData.shootout}
+                    onChange={(e) => setFormData({ ...formData, shootout: e.target.checked })}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="shootout" className="ml-3 text-sm font-semibold text-gray-700">
+                    Game decided by shootout
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Toggle */}
+                <div className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    id="emptyNetGoals"
+                    checked={showEmptyNetGoals}
+                    onChange={(e) => setShowEmptyNetGoals(e.target.checked)}
+                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
+                  />
+                  <label htmlFor="emptyNetGoals" className="ml-3 text-sm font-semibold text-gray-700">
+                    Track empty net goals
+                  </label>
+                </div>
+
+                {/* Empty Net Goals Inputs */}
+                {showEmptyNetGoals && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Home Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.homeEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, homeEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Away Empty Net Goals
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.awayEmptyNetGoals}
+                        onChange={(e) => setFormData({ ...formData, awayEmptyNetGoals: e.target.value })}
+                        min="0"
+                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Separator */}
@@ -533,7 +654,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Goals
+                      {formData.homeTeamId || 'Home Team'} Goals
                     </h5>
                     <button
                       type="button"
@@ -616,7 +737,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Goals
+                      {formData.awayTeamId || 'Away Team'} Goals
                     </h5>
                     <button
                       type="button"
@@ -707,7 +828,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId ? teams.find(t => t.id === formData.homeTeamId)?.name : 'Home Team'} Penalties
+                      {formData.homeTeamId || 'Home Team'} Penalties
                     </h5>
                     <button
                       type="button"
@@ -773,7 +894,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                 <div className="mb-6">
                   <div className="flex justify-between items-center mb-3">
                     <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId ? teams.find(t => t.id === formData.awayTeamId)?.name : 'Away Team'} Penalties
+                      {formData.awayTeamId || 'Away Team'} Penalties
                     </h5>
                     <button
                       type="button"
@@ -834,74 +955,6 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     <p className="text-gray-500 text-sm italic">No penalties added yet</p>
                   )}
                 </div>
-              </div>
-
-              {/* Separator */}
-              <div className="h-0.5 bg-gradient-to-r from-transparent via-[#e9ca8a] to-transparent mb-8"></div>
-
-              {/* Special Options */}
-              <div className="mb-8">
-                <h4 className="text-xl font-bold text-gray-900 mb-4">Special Options</h4>
-
-                {/* Shootout Toggle */}
-                <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id="shootout"
-                    checked={formData.shootout}
-                    onChange={(e) => setFormData({ ...formData, shootout: e.target.checked })}
-                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
-                  />
-                  <label htmlFor="shootout" className="ml-3 text-sm font-semibold text-gray-700">
-                    Game decided by shootout
-                  </label>
-                </div>
-
-                {/* Empty Net Goals Toggle */}
-                <div className="flex items-center mb-4">
-                  <input
-                    type="checkbox"
-                    id="emptyNetGoals"
-                    checked={showEmptyNetGoals}
-                    onChange={(e) => setShowEmptyNetGoals(e.target.checked)}
-                    className="w-5 h-5 text-[#e9ca8a] border-gray-300 rounded focus:ring-[#e9ca8a]"
-                  />
-                  <label htmlFor="emptyNetGoals" className="ml-3 text-sm font-semibold text-gray-700">
-                    Track empty net goals
-                  </label>
-                </div>
-
-                {/* Empty Net Goals Inputs */}
-                {showEmptyNetGoals && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Home Empty Net Goals
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.homeEmptyNetGoals}
-                        onChange={(e) => setFormData({ ...formData, homeEmptyNetGoals: e.target.value })}
-                        min="0"
-                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-semibold text-gray-700 mb-2">
-                        Away Empty Net Goals
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.awayEmptyNetGoals}
-                        onChange={(e) => setFormData({ ...formData, awayEmptyNetGoals: e.target.value })}
-                        min="0"
-                        className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                        placeholder="0"
-                      />
-                    </div>
-                  </div>
-                )}
               </div>
 
             </div>
