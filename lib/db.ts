@@ -74,6 +74,21 @@ export const getPlayers = async (division?: 'A' | 'B'): Promise<Player[]> => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Player));
 };
 
+export const getPlayerById = async (id: string): Promise<Player | null> => {
+  const playerRef = doc(db, 'players', id);
+  const playerDoc = await getDoc(playerRef);
+
+  if (!playerDoc.exists()) {
+    return null;
+  }
+
+  const data = playerDoc.data();
+  return {
+    id: playerDoc.id,
+    ...data,
+  } as Player;
+};
+
 export const getPlayersByTeam = async (teamId: string): Promise<Player[]> => {
   const playersCol = collection(db, 'players');
   const q = query(playersCol, where('teamId', '==', teamId));

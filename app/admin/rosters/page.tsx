@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getTeams, getPlayers, addPlayer, updatePlayer, deletePlayer, addTeam } from '@/lib/db';
+import { useRouter } from 'next/navigation';
+import { getTeams, getPlayers, deletePlayer } from '@/lib/db';
 import { Team, Player } from '@/types';
 
 export default function RostersPage() {
+  const router = useRouter();
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -320,18 +322,15 @@ export default function RostersPage() {
               {teams.find(t => t.id === selectedTeamId)?.name} Roster
             </h3>
             <button
-              onClick={() => {
-                setPlayerForm({ ...playerForm, teamId: selectedTeamId });
-                setShowPlayerForm(true);
-              }}
+              onClick={() => router.push(`/admin/rosters/players/new?teamId=${selectedTeamId}`)}
               className="w-full sm:w-auto bg-[#e9ca8a] text-black px-4 sm:px-6 py-3 rounded-lg hover:bg-[#d4b577] transition font-semibold text-sm sm:text-base"
             >
               + Add Player
             </button>
           </div>
 
-          {/* Player Form */}
-          {showPlayerForm && (
+          {/* Player Form - REMOVED, using separate page now */}
+          {false && showPlayerForm && (
             <div className="fixed inset-0 bg-gradient-to-br from-gray-50 to-white overflow-y-auto" style={{zIndex: 900}}>
               <div className="min-h-full pt-24 sm:pt-32 pb-8">
                 <form id="player-form" onSubmit={handleSubmitPlayer} className="max-w-4xl mx-auto p-4 sm:p-8 space-y-6 overflow-x-hidden">
@@ -487,7 +486,7 @@ export default function RostersPage() {
                     <td className="px-3 sm:px-6 py-4">
                       <div className="flex flex-row gap-4 items-center justify-center">
                         <button
-                          onClick={() => handleEditPlayer(player)}
+                          onClick={() => router.push(`/admin/rosters/players/${player.id}/edit`)}
                           className="text-black hover:opacity-60 font-medium transition text-xs sm:text-sm whitespace-nowrap"
                         >
                           ✏️ Edit
