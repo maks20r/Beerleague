@@ -351,7 +351,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     >
                       <option value="">Select home team</option>
-                      {teams.filter(t => t.division === formData.division).map(team => (
+                      {teams.map(team => (
                         <option key={team.id} value={team.id}>{team.name}</option>
                       ))}
                     </select>
@@ -367,7 +367,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                     >
                       <option value="">Select away team</option>
-                      {teams.filter(t => t.division === formData.division && t.id !== formData.homeTeamId).map(team => (
+                      {teams.filter(t => t.id !== formData.homeTeamId).map(team => (
                         <option key={team.id} value={team.id}>{team.name}</option>
                       ))}
                     </select>
@@ -401,39 +401,6 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                       onChange={(e) => setFormData({ ...formData, referee: e.target.value })}
                       className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
                       placeholder="Enter referee name"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* Scores Section */}
-              <div className="mb-8">
-                <h4 className="text-xl font-bold text-gray-900 mb-4">Final Score (Optional)</h4>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Home Team Score
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.homeScore}
-                      onChange={(e) => setFormData({ ...formData, homeScore: e.target.value })}
-                      min="0"
-                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                      placeholder="0"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Away Team Score
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.awayScore}
-                      onChange={(e) => setFormData({ ...formData, awayScore: e.target.value })}
-                      min="0"
-                      className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                      placeholder="0"
                     />
                   </div>
                 </div>
