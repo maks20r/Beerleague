@@ -128,10 +128,10 @@ export default function SchedulePage() {
                         minute: '2-digit'
                       }) : 'Date TBD'}
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                      game.division === 'A' ? 'bg-[#faf6ee] text-[#c9a865]' : 'bg-green-100 text-green-800'
+                    <span className={`px-2 sm:px-3 py-1 rounded-full text-xs font-bold ${
+                      game.division === 'A' ? 'bg-[#e9ca8a] text-black' : 'bg-black text-[#e9ca8a]'
                     }`}>
-                      Div {game.division}
+                      <span className="hidden sm:inline">Division </span>{game.division}
                     </span>
                   </div>
                   <div className="flex justify-between items-center">

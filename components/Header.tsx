@@ -66,10 +66,10 @@ export default function Header() {
             <div className="header-nav">
               <div className="header-nav-inner">
                 <Link href="http://hockeydubai.com">Home</Link>
-                <Link href="/">Standings</Link>
-                <Link href="/stats">Stats</Link>
-                <Link href="/schedule">Schedule</Link>
-                <Link href="/admin/login">Admin Login</Link>
+                <Link href="/" className={pathname === '/' ? 'active' : ''}>Standings</Link>
+                <Link href="/stats" className={pathname === '/stats' ? 'active' : ''}>Stats</Link>
+                <Link href="/schedule" className={pathname === '/schedule' ? 'active' : ''}>Schedule</Link>
+                <Link href="/admin/login" className={pathname === '/admin/login' ? 'active' : ''}>Admin Login</Link>
               </div>
             </div>
           )}
