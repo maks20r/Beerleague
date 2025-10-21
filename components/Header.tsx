@@ -46,31 +46,30 @@ export default function Header() {
           </div>
           <img src="/Group-120.png" alt="Team Logo" className="header-logo-right" />
 
-          {/* Mobile menu button */}
-          {user && (
-            <button
-              className="mobile-menu-button"
-              onClick={() => setMobileMenuOpen(true)}
-              aria-label="Open menu"
-            >
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="3" y1="12" x2="21" y2="12"></line>
-                <line x1="3" y1="6" x2="21" y2="6"></line>
-                <line x1="3" y1="18" x2="21" y2="18"></line>
-              </svg>
-            </button>
-          )}
+          {/* Mobile menu button - Always show for mobile */}
+          <button
+            className="mobile-menu-button"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open menu"
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          </button>
         </div>
 
         {/* Desktop navigation slot */}
         <div id="header-nav-slot">
-          {user && (
+          {(!user || !pathname.startsWith('/admin')) && (
             <div className="header-nav">
               <div className="header-nav-inner">
-                <Link href="/admin/games">Games</Link>
-                <Link href="/admin/rosters">Teams</Link>
-                <Link href="/">View Public Site</Link>
-                <button onClick={handleSignOut}>Sign Out</button>
+                <Link href="http://hockeydubai.com">Home</Link>
+                <Link href="/">Standings</Link>
+                <Link href="/stats">Stats</Link>
+                <Link href="/schedule">Schedule</Link>
+                <Link href="/admin/login">Admin Login</Link>
               </div>
             </div>
           )}
@@ -78,46 +77,81 @@ export default function Header() {
       </div>
 
       {/* Mobile menu overlay */}
-      {user && (
-        <>
-          <div
-            className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          <div className={`mobile-menu ${mobileMenuOpen ? 'active' : ''}`}>
-            <div className="mobile-menu-header">
-              <span className="font-bold text-lg">Menu</span>
-              <button
-                className="mobile-menu-close"
-                onClick={() => setMobileMenuOpen(false)}
-                aria-label="Close menu"
-              >
-                ×
-              </button>
-            </div>
-            <nav className="mobile-menu-nav">
-              <Link
-                href="/admin/games"
-                className={pathname === '/admin/games' ? 'active' : ''}
-              >
-                Games
-              </Link>
-              <Link
-                href="/admin/rosters"
-                className={pathname === '/admin/rosters' ? 'active' : ''}
-              >
-                Teams
-              </Link>
-              <Link href="/">
-                View Public Site
-              </Link>
-              <button onClick={handleSignOut}>
-                Sign Out
-              </button>
-            </nav>
+      <>
+        <div
+          className={`mobile-menu-overlay ${mobileMenuOpen ? 'active' : ''}`}
+          onClick={() => setMobileMenuOpen(false)}
+        />
+        <div className={`mobile-menu ${mobileMenuOpen ? 'active' : ''}`}>
+          <div className="mobile-menu-header">
+            <span className="font-bold text-lg">Menu</span>
+            <button
+              className="mobile-menu-close"
+              onClick={() => setMobileMenuOpen(false)}
+              aria-label="Close menu"
+            >
+              ×
+            </button>
           </div>
-        </>
-      )}
+          <nav className="mobile-menu-nav">
+            {user ? (
+              <>
+                <Link href="http://hockeydubai.com">
+                  Home
+                </Link>
+                <Link
+                  href="/admin/games"
+                  className={pathname === '/admin/games' ? 'active' : ''}
+                >
+                  Games
+                </Link>
+                <Link
+                  href="/admin/rosters"
+                  className={pathname === '/admin/rosters' ? 'active' : ''}
+                >
+                  Teams
+                </Link>
+                <Link
+                  href="/admin/overview"
+                  className={pathname === '/admin/overview' ? 'active' : ''}
+                >
+                  Overview
+                </Link>
+                <button onClick={handleSignOut}>
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <>
+                <Link href="http://hockeydubai.com">
+                  Home
+                </Link>
+                <Link
+                  href="/"
+                  className={pathname === '/' ? 'active' : ''}
+                >
+                  Standings
+                </Link>
+                <Link
+                  href="/stats"
+                  className={pathname === '/stats' ? 'active' : ''}
+                >
+                  Stats
+                </Link>
+                <Link
+                  href="/schedule"
+                  className={pathname === '/schedule' ? 'active' : ''}
+                >
+                  Schedule
+                </Link>
+                <Link href="/admin/login">
+                  Admin Login
+                </Link>
+              </>
+            )}
+          </nav>
+        </div>
+      </>
     </>
   );
 }

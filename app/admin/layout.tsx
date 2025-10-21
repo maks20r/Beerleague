@@ -67,6 +67,9 @@ export default function AdminLayout({
       {navSlot && createPortal(
         <div className="header-nav">
           <div className="header-nav-inner">
+            <Link href="http://hockeydubai.com">
+              Home
+            </Link>
             <Link
               href="/admin/games"
               className={pathname === '/admin/games' ? 'active' : ''}
@@ -79,8 +82,11 @@ export default function AdminLayout({
             >
               Teams
             </Link>
-            <Link href="/">
-              View Public Site
+            <Link
+              href="/admin/overview"
+              className={pathname === '/admin/overview' ? 'active' : ''}
+            >
+              Overview
             </Link>
             <button onClick={handleSignOut}>
               Sign Out
