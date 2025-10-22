@@ -117,6 +117,12 @@ export default function Header() {
                 >
                   Overview
                 </Link>
+                <Link
+                  href="/admin/instructions"
+                  className={pathname === '/admin/instructions' ? 'active' : ''}
+                >
+                  Instructions
+                </Link>
                 <button onClick={handleSignOut}>
                   Sign Out
                 </button>

@@ -88,6 +88,12 @@ export default function AdminLayout({
             >
               Overview
             </Link>
+            <Link
+              href="/admin/instructions"
+              className={pathname === '/admin/instructions' ? 'active' : ''}
+            >
+              Instructions
+            </Link>
             <button onClick={handleSignOut}>
               Sign Out
             </button>
