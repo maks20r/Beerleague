@@ -19,6 +19,8 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'overview' | 'results'>('overview');
+  const [goalsActiveTeam, setGoalsActiveTeam] = useState<'home' | 'away'>('home');
+  const [penaltiesActiveTeam, setPenaltiesActiveTeam] = useState<'home' | 'away'>('home');
 
   const [formData, setFormData] = useState({
     date: '',
@@ -687,17 +689,45 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Goals</h4>
 
+                {/* Mobile Team Tabs - Goals */}
+                <div className="lg:hidden mb-4">
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => setGoalsActiveTeam('home')}
+                      className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                        goalsActiveTeam === 'home'
+                          ? 'border-[#e9ca8a] text-gray-900 bg-[#e9ca8a]/10'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {formData.homeTeamId || 'Home Team'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setGoalsActiveTeam('away')}
+                      className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                        goalsActiveTeam === 'away'
+                          ? 'border-[#e9ca8a] text-gray-900 bg-[#e9ca8a]/10'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {formData.awayTeamId || 'Away Team'}
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Home Team Goals */}
-                  <div>
-                    <div className="mb-3">
+                  <div className={`lg:block ${goalsActiveTeam === 'home' ? 'block' : 'hidden'}`}>
+                    <div className="mb-3 hidden lg:block">
                       <h5 className="text-lg font-semibold text-gray-800">
                         {formData.homeTeamId || 'Home Team'} Goals
                       </h5>
                     </div>
                     {resultsData.homeGoals.map((goal, index) => (
                       <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-4 gap-1 sm:gap-2">
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
                             <input
@@ -705,7 +735,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               value={goal.time}
                               onChange={(e) => updateGoal('home', index, 'time', e.target.value)}
                               placeholder="00:00"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                           <div>
@@ -713,7 +743,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.scorer}
                               onChange={(e) => updateGoal('home', index, 'scorer', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {homeTeamPlayers.map(player => (
@@ -726,7 +756,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.assist1}
                               onChange={(e) => updateGoal('home', index, 'assist1', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {homeTeamPlayers.map(player => (
@@ -739,7 +769,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.assist2}
                               onChange={(e) => updateGoal('home', index, 'assist2', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {homeTeamPlayers.map(player => (
@@ -762,15 +792,15 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                   </div>
 
                   {/* Away Team Goals */}
-                  <div>
-                    <div className="mb-3">
+                  <div className={`lg:block ${goalsActiveTeam === 'away' ? 'block' : 'hidden'}`}>
+                    <div className="mb-3 hidden lg:block">
                       <h5 className="text-lg font-semibold text-gray-800">
                         {formData.awayTeamId || 'Away Team'} Goals
                       </h5>
                     </div>
                     {resultsData.awayGoals.map((goal, index) => (
                       <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                        <div className="grid grid-cols-4 gap-1 sm:gap-2">
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
                             <input
@@ -778,7 +808,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               value={goal.time}
                               onChange={(e) => updateGoal('away', index, 'time', e.target.value)}
                               placeholder="00:00"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                           <div>
@@ -786,7 +816,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.scorer}
                               onChange={(e) => updateGoal('away', index, 'scorer', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {awayTeamPlayers.map(player => (
@@ -799,7 +829,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.assist1}
                               onChange={(e) => updateGoal('away', index, 'assist1', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {awayTeamPlayers.map(player => (
@@ -812,7 +842,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             <select
                               value={goal.assist2}
                               onChange={(e) => updateGoal('away', index, 'assist2', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select</option>
                               {awayTeamPlayers.map(player => (
@@ -843,23 +873,51 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Penalties</h4>
 
+                {/* Mobile Team Tabs - Penalties */}
+                <div className="lg:hidden mb-4">
+                  <div className="flex border-b border-gray-200">
+                    <button
+                      type="button"
+                      onClick={() => setPenaltiesActiveTeam('home')}
+                      className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                        penaltiesActiveTeam === 'home'
+                          ? 'border-[#e9ca8a] text-gray-900 bg-[#e9ca8a]/10'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {formData.homeTeamId || 'Home Team'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPenaltiesActiveTeam('away')}
+                      className={`flex-1 py-2 px-4 text-sm font-medium border-b-2 transition-colors ${
+                        penaltiesActiveTeam === 'away'
+                          ? 'border-[#e9ca8a] text-gray-900 bg-[#e9ca8a]/10'
+                          : 'border-transparent text-gray-500 hover:text-gray-700'
+                      }`}
+                    >
+                      {formData.awayTeamId || 'Away Team'}
+                    </button>
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {/* Home Team Penalties */}
-                  <div>
-                    <div className="mb-3">
+                  <div className={`lg:block ${penaltiesActiveTeam === 'home' ? 'block' : 'hidden'}`}>
+                    <div className="mb-3 hidden lg:block">
                       <h5 className="text-lg font-semibold text-gray-800">
                         {formData.homeTeamId || 'Home Team'} Penalties
                       </h5>
                     </div>
                     {resultsData.homePenalties.map((penalty, index) => (
                       <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
                             <select
                               value={penalty.player}
                               onChange={(e) => updatePenalty('home', index, 'player', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select player</option>
                               {homeTeamPlayers.map(player => (
@@ -874,7 +932,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               value={penalty.infraction}
                               onChange={(e) => updatePenalty('home', index, 'infraction', e.target.value)}
                               placeholder="Tripping"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                           <div>
@@ -885,37 +943,39 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               onChange={(e) => updatePenalty('home', index, 'minutes', e.target.value)}
                               placeholder="2"
                               min="0"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removePenalty('home', index)}
-                          className="text-red-600 hover:text-red-800 text-sm font-bold"
-                        >
-                          Remove Penalty
-                        </button>
+                        {(penalty.player || penalty.infraction || penalty.minutes) && (
+                          <button
+                            type="button"
+                            onClick={() => removePenalty('home', index)}
+                            className="text-red-600 hover:text-red-800 text-xs font-medium mt-2"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>
 
                   {/* Away Team Penalties */}
-                  <div>
-                    <div className="mb-3">
+                  <div className={`lg:block ${penaltiesActiveTeam === 'away' ? 'block' : 'hidden'}`}>
+                    <div className="mb-3 hidden lg:block">
                       <h5 className="text-lg font-semibold text-gray-800">
                         {formData.awayTeamId || 'Away Team'} Penalties
                       </h5>
                     </div>
                     {resultsData.awayPenalties.map((penalty, index) => (
                       <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                        <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
                             <select
                               value={penalty.player}
                               onChange={(e) => updatePenalty('away', index, 'player', e.target.value)}
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             >
                               <option value="">Select player</option>
                               {awayTeamPlayers.map(player => (
@@ -930,7 +990,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               value={penalty.infraction}
                               onChange={(e) => updatePenalty('away', index, 'infraction', e.target.value)}
                               placeholder="Tripping"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                           <div>
@@ -941,17 +1001,19 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               onChange={(e) => updatePenalty('away', index, 'minutes', e.target.value)}
                               placeholder="2"
                               min="0"
-                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
                             />
                           </div>
                         </div>
-                        <button
-                          type="button"
-                          onClick={() => removePenalty('away', index)}
-                          className="text-red-600 hover:text-red-800 text-sm font-bold"
-                        >
-                          Remove Penalty
-                        </button>
+                        {(penalty.player || penalty.infraction || penalty.minutes) && (
+                          <button
+                            type="button"
+                            onClick={() => removePenalty('away', index)}
+                            className="text-red-600 hover:text-red-800 text-xs font-medium mt-2"
+                          >
+                            Remove
+                          </button>
+                        )}
                       </div>
                     ))}
                   </div>

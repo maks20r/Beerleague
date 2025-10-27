@@ -86,7 +86,7 @@ export default function StatsPage() {
               </div>
               <button
                 onClick={() => setShowAllPlayers(!showAllPlayers)}
-                className="w-full sm:w-auto px-4 sm:px-6 py-2 rounded-lg font-semibold transition bg-[#e9ca8a] text-black hover:bg-[#d4b577] text-sm sm:text-base"
+                className="w-full sm:w-auto text-gray-700 hover:text-gray-900 underline text-sm sm:text-base"
               >
                 {showAllPlayers ? 'Show Top 10' : 'View All Players'}
               </button>
