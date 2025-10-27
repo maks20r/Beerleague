@@ -66,9 +66,12 @@ export default function Header() {
             <div className="header-nav">
               <div className="header-nav-inner">
                 <Link href="http://hockeydubai.com">Home</Link>
-                <Link href="/" className={pathname === '/' ? 'active' : ''}>Standings</Link>
                 <Link href="/stats" className={pathname === '/stats' ? 'active' : ''}>Stats</Link>
+                <Link href="/" className={pathname === '/' ? 'active' : ''}>Standings</Link>
                 <Link href="/schedule" className={pathname === '/schedule' ? 'active' : ''}>Schedule</Link>
+                <Link href="https://hockeydubai.com/events/" className={pathname === '/events' ? 'active' : ''}>Events</Link>
+                <Link href="https://hockeydubai.com/mighty-camels/" className={pathname === '/mighty-camels-eihl' ? 'active' : ''}>Mighty Camels EIHL</Link>
+                <Link href="https://hockeydubai.com/register2025-2026/" className={pathname === '/register' ? 'active' : ''}>Register now</Link>
                 <Link href="/admin/login" className={pathname === '/admin/login' ? 'active' : ''}>Admin Login</Link>
               </div>
             </div>
@@ -133,22 +136,40 @@ export default function Header() {
                   Home
                 </Link>
                 <Link
-                  href="/"
-                  className={pathname === '/' ? 'active' : ''}
-                >
-                  Standings
-                </Link>
-                <Link
                   href="/stats"
                   className={pathname === '/stats' ? 'active' : ''}
                 >
                   Stats
                 </Link>
                 <Link
+                  href="/"
+                  className={pathname === '/' ? 'active' : ''}
+                >
+                  Standings
+                </Link>
+                <Link
                   href="/schedule"
                   className={pathname === '/schedule' ? 'active' : ''}
                 >
                   Schedule
+                </Link>
+                <Link
+                  href="https://hockeydubai.com/events/"
+                  className={pathname === '/events' ? 'active' : ''}
+                >
+                  Events
+                </Link>
+                <Link
+                  href="https://hockeydubai.com/mighty-camels/"
+                  className={pathname === '/mighty-camels-eihl' ? 'active' : ''}
+                >
+                  Mighty Camels EIHL
+                </Link>
+                <Link
+                  href="https://hockeydubai.com/register2025-2026/"
+                  className={pathname === '/register' ? 'active' : ''}
+                >
+                  Register now
                 </Link>
                 <Link href="/admin/login">
                   Admin Login
