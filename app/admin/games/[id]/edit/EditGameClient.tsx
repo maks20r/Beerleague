@@ -70,6 +70,61 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     fetchData();
   }, [gameId]);
 
+  // Auto-add new goal when last one is filled
+  useEffect(() => {
+    // Check home goals
+    const lastHomeGoal = resultsData.homeGoals[resultsData.homeGoals.length - 1];
+    if (!lastHomeGoal || (lastHomeGoal.scorer || lastHomeGoal.assist1 || lastHomeGoal.assist2 || lastHomeGoal.time)) {
+      // If there's no last goal or the last goal has some data, ensure there's an empty one
+      const hasEmptyHomeGoal = resultsData.homeGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time);
+      if (!hasEmptyHomeGoal) {
+        setResultsData(prev => ({
+          ...prev,
+          homeGoals: [...prev.homeGoals, { scorer: '', assist1: '', assist2: '', time: '' }]
+        }));
+      }
+    }
+
+    // Check away goals
+    const lastAwayGoal = resultsData.awayGoals[resultsData.awayGoals.length - 1];
+    if (!lastAwayGoal || (lastAwayGoal.scorer || lastAwayGoal.assist1 || lastAwayGoal.assist2 || lastAwayGoal.time)) {
+      // If there's no last goal or the last goal has some data, ensure there's an empty one
+      const hasEmptyAwayGoal = resultsData.awayGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time);
+      if (!hasEmptyAwayGoal) {
+        setResultsData(prev => ({
+          ...prev,
+          awayGoals: [...prev.awayGoals, { scorer: '', assist1: '', assist2: '', time: '' }]
+        }));
+      }
+    }
+
+    // Check home penalties
+    const lastHomePenalty = resultsData.homePenalties[resultsData.homePenalties.length - 1];
+    if (!lastHomePenalty || (lastHomePenalty.player || lastHomePenalty.infraction || lastHomePenalty.minutes)) {
+      // If there's no last penalty or the last penalty has some data, ensure there's an empty one
+      const hasEmptyHomePenalty = resultsData.homePenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes);
+      if (!hasEmptyHomePenalty) {
+        setResultsData(prev => ({
+          ...prev,
+          homePenalties: [...prev.homePenalties, { player: '', infraction: '', minutes: '' }]
+        }));
+      }
+    }
+
+    // Check away penalties
+    const lastAwayPenalty = resultsData.awayPenalties[resultsData.awayPenalties.length - 1];
+    if (!lastAwayPenalty || (lastAwayPenalty.player || lastAwayPenalty.infraction || lastAwayPenalty.minutes)) {
+      // If there's no last penalty or the last penalty has some data, ensure there's an empty one
+      const hasEmptyAwayPenalty = resultsData.awayPenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes);
+      if (!hasEmptyAwayPenalty) {
+        setResultsData(prev => ({
+          ...prev,
+          awayPenalties: [...prev.awayPenalties, { player: '', infraction: '', minutes: '' }]
+        }));
+      }
+    }
+  }, [resultsData.homeGoals, resultsData.awayGoals, resultsData.homePenalties, resultsData.awayPenalties]);
+
   const fetchData = async () => {
     try {
       const [gameData, teamsData, playersData, goaliesData] = await Promise.all([
@@ -112,10 +167,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
       setResultsData({
         homeShots: gameData.homeShots?.toString() || '',
         awayShots: gameData.awayShots?.toString() || '',
-        homeGoals: gameData.homeGoals || [],
-        awayGoals: gameData.awayGoals || [],
-        homePenalties: gameData.homePenalties || [],
-        awayPenalties: gameData.awayPenalties || []
+        homeGoals: (gameData.homeGoals && gameData.homeGoals.length > 0) ? gameData.homeGoals : [{ scorer: '', assist1: '', assist2: '', time: '' }],
+        awayGoals: (gameData.awayGoals && gameData.awayGoals.length > 0) ? gameData.awayGoals : [{ scorer: '', assist1: '', assist2: '', time: '' }],
+        homePenalties: (gameData.homePenalties && gameData.homePenalties.length > 0) ? gameData.homePenalties : [{ player: '', infraction: '', minutes: '' }],
+        awayPenalties: (gameData.awayPenalties && gameData.awayPenalties.length > 0) ? gameData.awayPenalties : [{ player: '', infraction: '', minutes: '' }]
       });
     } catch (error) {
       console.error('Error fetching game:', error);
@@ -147,10 +202,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
         venue: formData.venue || '',
         shootout: formData.shootout,
         status: gameStatus,
-        homeGoals: resultsData.homeGoals,
-        awayGoals: resultsData.awayGoals,
-        homePenalties: resultsData.homePenalties,
-        awayPenalties: resultsData.awayPenalties
+        homeGoals: resultsData.homeGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
+        awayGoals: resultsData.awayGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
+        homePenalties: resultsData.homePenalties.filter(p => p.player || p.infraction || p.minutes),
+        awayPenalties: resultsData.awayPenalties.filter(p => p.player || p.infraction || p.minutes)
       };
 
       // Only add fields if they have values
@@ -187,10 +242,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
         await updatePlayerStatsFromGame(gameId, {
           homeTeamId: formData.homeTeamId,
           awayTeamId: formData.awayTeamId,
-          homeGoals: resultsData.homeGoals,
-          awayGoals: resultsData.awayGoals,
-          homePenalties: resultsData.homePenalties,
-          awayPenalties: resultsData.awayPenalties
+          homeGoals: resultsData.homeGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
+          awayGoals: resultsData.awayGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
+          homePenalties: resultsData.homePenalties.filter(p => p.player || p.infraction || p.minutes),
+          awayPenalties: resultsData.awayPenalties.filter(p => p.player || p.infraction || p.minutes)
         }, oldPlayerGameData);
 
         // Update goalie stats from game results
@@ -232,15 +287,6 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     }
   };
 
-  const addGoal = (team: 'home' | 'away') => {
-    const newGoal = { scorer: '', assist1: '', assist2: '', time: '' };
-    if (team === 'home') {
-      setResultsData({ ...resultsData, homeGoals: [...resultsData.homeGoals, newGoal] });
-    } else {
-      setResultsData({ ...resultsData, awayGoals: [...resultsData.awayGoals, newGoal] });
-    }
-  };
-
   const removeGoal = (team: 'home' | 'away', index: number) => {
     if (team === 'home') {
       setResultsData({ ...resultsData, homeGoals: resultsData.homeGoals.filter((_, i) => i !== index) });
@@ -258,15 +304,6 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
       const updated = [...resultsData.awayGoals];
       updated[index] = { ...updated[index], [field]: value };
       setResultsData({ ...resultsData, awayGoals: updated });
-    }
-  };
-
-  const addPenalty = (team: 'home' | 'away') => {
-    const newPenalty = { player: '', infraction: '', minutes: '' };
-    if (team === 'home') {
-      setResultsData({ ...resultsData, homePenalties: [...resultsData.homePenalties, newPenalty] });
-    } else {
-      setResultsData({ ...resultsData, awayPenalties: [...resultsData.awayPenalties, newPenalty] });
     }
   };
 
@@ -296,7 +333,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     return players.filter(p => p.teamId === team.id);
   };
 
-  const getTeamGoalies = (teamName: string) => {
+  const getTeamGoalies = () => {
     // Return all goalies since they can play for any team
     return goalies;
   };
@@ -311,8 +348,8 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
 
   const homeTeamPlayers = getTeamPlayers(formData.homeTeamId);
   const awayTeamPlayers = getTeamPlayers(formData.awayTeamId);
-  const homeTeamGoalies = getTeamGoalies(formData.homeTeamId);
-  const awayTeamGoalies = getTeamGoalies(formData.awayTeamId);
+  const homeTeamGoalies = getTeamGoalies();
+  const awayTeamGoalies = getTeamGoalies();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-white">
@@ -650,170 +687,152 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Goals</h4>
 
-                {/* Home Team Goals */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId || 'Home Team'} Goals
-                    </h5>
-                    <button
-                      type="button"
-                      onClick={() => addGoal('home')}
-                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
-                    >
-                      + Add Goal
-                    </button>
-                  </div>
-                  {resultsData.homeGoals.map((goal, index) => (
-                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Scorer</label>
-                          <select
-                            value={goal.scorer}
-                            onChange={(e) => updateGoal('home', index, 'scorer', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select scorer</option>
-                            {homeTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Time</label>
-                          <input
-                            type="text"
-                            value={goal.time}
-                            onChange={(e) => updateGoal('home', index, 'time', e.target.value)}
-                            placeholder="00:00"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 1</label>
-                          <select
-                            value={goal.assist1}
-                            onChange={(e) => updateGoal('home', index, 'assist1', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select assist</option>
-                            {homeTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 2</label>
-                          <select
-                            value={goal.assist2}
-                            onChange={(e) => updateGoal('home', index, 'assist2', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select assist</option>
-                            {homeTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeGoal('home', index)}
-                        className="text-red-600 hover:text-red-800 text-sm font-bold"
-                      >
-                        Remove Goal
-                      </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Home Team Goals */}
+                  <div>
+                    <div className="mb-3">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        {formData.homeTeamId || 'Home Team'} Goals
+                      </h5>
                     </div>
-                  ))}
-                  {resultsData.homeGoals.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No goals added yet</p>
-                  )}
-                </div>
+                    {resultsData.homeGoals.map((goal, index) => (
+                      <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
+                            <input
+                              type="text"
+                              value={goal.time}
+                              onChange={(e) => updateGoal('home', index, 'time', e.target.value)}
+                              placeholder="00:00"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Scorer</label>
+                            <select
+                              value={goal.scorer}
+                              onChange={(e) => updateGoal('home', index, 'scorer', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {homeTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Assist 1</label>
+                            <select
+                              value={goal.assist1}
+                              onChange={(e) => updateGoal('home', index, 'assist1', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {homeTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Assist 2</label>
+                            <select
+                              value={goal.assist2}
+                              onChange={(e) => updateGoal('home', index, 'assist2', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {homeTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
+                          <button
+                            type="button"
+                            onClick={() => removeGoal('home', index)}
+                            className="text-red-600 hover:text-red-800 text-xs font-medium mt-2"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Away Team Goals */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId || 'Away Team'} Goals
-                    </h5>
-                    <button
-                      type="button"
-                      onClick={() => addGoal('away')}
-                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
-                    >
-                      + Add Goal
-                    </button>
-                  </div>
-                  {resultsData.awayGoals.map((goal, index) => (
-                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Scorer</label>
-                          <select
-                            value={goal.scorer}
-                            onChange={(e) => updateGoal('away', index, 'scorer', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select scorer</option>
-                            {awayTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Time</label>
-                          <input
-                            type="text"
-                            value={goal.time}
-                            onChange={(e) => updateGoal('away', index, 'time', e.target.value)}
-                            placeholder="00:00"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 1</label>
-                          <select
-                            value={goal.assist1}
-                            onChange={(e) => updateGoal('away', index, 'assist1', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select assist</option>
-                            {awayTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Assist 2</label>
-                          <select
-                            value={goal.assist2}
-                            onChange={(e) => updateGoal('away', index, 'assist2', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select assist</option>
-                            {awayTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removeGoal('away', index)}
-                        className="text-red-600 hover:text-red-800 text-sm font-bold"
-                      >
-                        Remove Goal
-                      </button>
+                  {/* Away Team Goals */}
+                  <div>
+                    <div className="mb-3">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        {formData.awayTeamId || 'Away Team'} Goals
+                      </h5>
                     </div>
-                  ))}
-                  {resultsData.awayGoals.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No goals added yet</p>
-                  )}
+                    {resultsData.awayGoals.map((goal, index) => (
+                      <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
+                            <input
+                              type="text"
+                              value={goal.time}
+                              onChange={(e) => updateGoal('away', index, 'time', e.target.value)}
+                              placeholder="00:00"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Scorer</label>
+                            <select
+                              value={goal.scorer}
+                              onChange={(e) => updateGoal('away', index, 'scorer', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {awayTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Assist 1</label>
+                            <select
+                              value={goal.assist1}
+                              onChange={(e) => updateGoal('away', index, 'assist1', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {awayTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Assist 2</label>
+                            <select
+                              value={goal.assist2}
+                              onChange={(e) => updateGoal('away', index, 'assist2', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select</option>
+                              {awayTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
+                          <button
+                            type="button"
+                            onClick={() => removeGoal('away', index)}
+                            className="text-red-600 hover:text-red-800 text-xs font-medium mt-2"
+                          >
+                            Remove
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -824,136 +843,118 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
               <div className="mb-8">
                 <h4 className="text-xl font-bold text-gray-900 mb-4">Penalties</h4>
 
-                {/* Home Team Penalties */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.homeTeamId || 'Home Team'} Penalties
-                    </h5>
-                    <button
-                      type="button"
-                      onClick={() => addPenalty('home')}
-                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
-                    >
-                      + Add Penalty
-                    </button>
-                  </div>
-                  {resultsData.homePenalties.map((penalty, index) => (
-                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
-                          <select
-                            value={penalty.player}
-                            onChange={(e) => updatePenalty('home', index, 'player', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select player</option>
-                            {homeTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
-                          <input
-                            type="text"
-                            value={penalty.infraction}
-                            onChange={(e) => updatePenalty('home', index, 'infraction', e.target.value)}
-                            placeholder="e.g., Tripping"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
-                          <input
-                            type="number"
-                            value={penalty.minutes}
-                            onChange={(e) => updatePenalty('home', index, 'minutes', e.target.value)}
-                            placeholder="2"
-                            min="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removePenalty('home', index)}
-                        className="text-red-600 hover:text-red-800 text-sm font-bold"
-                      >
-                        Remove Penalty
-                      </button>
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Home Team Penalties */}
+                  <div>
+                    <div className="mb-3">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        {formData.homeTeamId || 'Home Team'} Penalties
+                      </h5>
                     </div>
-                  ))}
-                  {resultsData.homePenalties.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No penalties added yet</p>
-                  )}
-                </div>
+                    {resultsData.homePenalties.map((penalty, index) => (
+                      <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
+                            <select
+                              value={penalty.player}
+                              onChange={(e) => updatePenalty('home', index, 'player', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select player</option>
+                              {homeTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
+                            <input
+                              type="text"
+                              value={penalty.infraction}
+                              onChange={(e) => updatePenalty('home', index, 'infraction', e.target.value)}
+                              placeholder="Tripping"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
+                            <input
+                              type="number"
+                              value={penalty.minutes}
+                              onChange={(e) => updatePenalty('home', index, 'minutes', e.target.value)}
+                              placeholder="2"
+                              min="0"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removePenalty('home', index)}
+                          className="text-red-600 hover:text-red-800 text-sm font-bold"
+                        >
+                          Remove Penalty
+                        </button>
+                      </div>
+                    ))}
+                  </div>
 
-                {/* Away Team Penalties */}
-                <div className="mb-6">
-                  <div className="flex justify-between items-center mb-3">
-                    <h5 className="text-lg font-semibold text-gray-800">
-                      {formData.awayTeamId || 'Away Team'} Penalties
-                    </h5>
-                    <button
-                      type="button"
-                      onClick={() => addPenalty('away')}
-                      className="px-4 py-2 bg-[#e9ca8a] hover:bg-[#d4b574] text-black font-bold rounded-lg transition"
-                    >
-                      + Add Penalty
-                    </button>
-                  </div>
-                  {resultsData.awayPenalties.map((penalty, index) => (
-                    <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
-                          <select
-                            value={penalty.player}
-                            onChange={(e) => updatePenalty('away', index, 'player', e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          >
-                            <option value="">Select player</option>
-                            {awayTeamPlayers.map(player => (
-                              <option key={player.id} value={player.name}>{player.name}</option>
-                            ))}
-                          </select>
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
-                          <input
-                            type="text"
-                            value={penalty.infraction}
-                            onChange={(e) => updatePenalty('away', index, 'infraction', e.target.value)}
-                            placeholder="e.g., Tripping"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                        <div>
-                          <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
-                          <input
-                            type="number"
-                            value={penalty.minutes}
-                            onChange={(e) => updatePenalty('away', index, 'minutes', e.target.value)}
-                            placeholder="2"
-                            min="0"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white"
-                          />
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => removePenalty('away', index)}
-                        className="text-red-600 hover:text-red-800 text-sm font-bold"
-                      >
-                        Remove Penalty
-                      </button>
+                  {/* Away Team Penalties */}
+                  <div>
+                    <div className="mb-3">
+                      <h5 className="text-lg font-semibold text-gray-800">
+                        {formData.awayTeamId || 'Away Team'} Penalties
+                      </h5>
                     </div>
-                  ))}
-                  {resultsData.awayPenalties.length === 0 && (
-                    <p className="text-gray-500 text-sm italic">No penalties added yet</p>
-                  )}
+                    {resultsData.awayPenalties.map((penalty, index) => (
+                      <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
+                            <select
+                              value={penalty.player}
+                              onChange={(e) => updatePenalty('away', index, 'player', e.target.value)}
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">Select player</option>
+                              {awayTeamPlayers.map(player => (
+                                <option key={player.id} value={player.name}>{player.name}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
+                            <input
+                              type="text"
+                              value={penalty.infraction}
+                              onChange={(e) => updatePenalty('away', index, 'infraction', e.target.value)}
+                              placeholder="Tripping"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Minutes</label>
+                            <input
+                              type="number"
+                              value={penalty.minutes}
+                              onChange={(e) => updatePenalty('away', index, 'minutes', e.target.value)}
+                              placeholder="2"
+                              min="0"
+                              className="w-full px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            />
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removePenalty('away', index)}
+                          className="text-red-600 hover:text-red-800 text-sm font-bold"
+                        >
+                          Remove Penalty
+                        </button>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
 
