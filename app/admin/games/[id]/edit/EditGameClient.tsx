@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getGameById, updateGame, getTeams, getPlayers, getGoalies, updateTeamStandings, updatePlayerStatsFromGame, updateGoalieStatsFromGame } from '@/lib/db';
 import { Game, Team, Player, Goalie } from '@/types';
@@ -354,6 +354,49 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     // If not a number, treat as player name
     return input;
   };
+
+  // Debounce utility for delayed jersey number resolution
+  const timeoutRef = useRef<{[key: string]: NodeJS.Timeout}>({});
+  
+  const debouncedResolvePlayer = useCallback((
+    input: string, 
+    teamPlayers: Player[], 
+    updateCallback: (resolvedValue: string) => void, 
+    timeoutKey: string
+  ) => {
+    // Clear any existing timeout for this field
+    if (timeoutRef.current[timeoutKey]) {
+      clearTimeout(timeoutRef.current[timeoutKey]);
+    }
+    
+    // If input is empty, resolve immediately
+    if (!input.trim()) {
+      updateCallback('');
+      return;
+    }
+    
+    // Check if input is purely numeric (jersey number)
+    const jerseyNumber = parseInt(input.trim());
+    if (!isNaN(jerseyNumber) && input.trim() === jerseyNumber.toString()) {
+      // Set a timeout to resolve after 500ms of no typing
+      timeoutRef.current[timeoutKey] = setTimeout(() => {
+        const player = teamPlayers.find(p => p.jerseyNumber === jerseyNumber);
+        if (player) {
+          updateCallback(player.name);
+        }
+        delete timeoutRef.current[timeoutKey];
+      }, 500);
+    }
+  }, []);
+
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(timeoutRef.current).forEach(timeout => {
+        if (timeout) clearTimeout(timeout);
+      });
+    };
+  }, []);
 
   if (loading) {
     return <div className="text-center py-12">Loading game...</div>;
@@ -759,8 +802,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.scorer}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
-                                updateGoal('home', index, 'scorer', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('home', index, 'scorer', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  homeTeamPlayers, 
+                                  (resolvedName) => updateGoal('home', index, 'scorer', resolvedName),
+                                  `home-scorer-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -772,8 +823,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.assist1}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
-                                updateGoal('home', index, 'assist1', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('home', index, 'assist1', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  homeTeamPlayers, 
+                                  (resolvedName) => updateGoal('home', index, 'assist1', resolvedName),
+                                  `home-assist1-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -785,8 +844,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.assist2}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
-                                updateGoal('home', index, 'assist2', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('home', index, 'assist2', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  homeTeamPlayers, 
+                                  (resolvedName) => updateGoal('home', index, 'assist2', resolvedName),
+                                  `home-assist2-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -832,8 +899,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.scorer}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
-                                updateGoal('away', index, 'scorer', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('away', index, 'scorer', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  awayTeamPlayers, 
+                                  (resolvedName) => updateGoal('away', index, 'scorer', resolvedName),
+                                  `away-scorer-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -845,8 +920,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.assist1}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
-                                updateGoal('away', index, 'assist1', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('away', index, 'assist1', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  awayTeamPlayers, 
+                                  (resolvedName) => updateGoal('away', index, 'assist1', resolvedName),
+                                  `away-assist1-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -858,8 +941,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={goal.assist2}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
-                                updateGoal('away', index, 'assist2', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updateGoal('away', index, 'assist2', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  awayTeamPlayers, 
+                                  (resolvedName) => updateGoal('away', index, 'assist2', resolvedName),
+                                  `away-assist2-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -933,8 +1024,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={penalty.player}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
-                                updatePenalty('home', index, 'player', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updatePenalty('home', index, 'player', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  homeTeamPlayers, 
+                                  (resolvedName) => updatePenalty('home', index, 'player', resolvedName),
+                                  `home-penalty-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
@@ -991,8 +1090,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                               type="text"
                               value={penalty.player}
                               onChange={(e) => {
-                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
-                                updatePenalty('away', index, 'player', resolvedName || e.target.value);
+                                const inputValue = e.target.value;
+                                // Update immediately with input value
+                                updatePenalty('away', index, 'player', inputValue);
+                                // Use debounced resolution for jersey numbers
+                                debouncedResolvePlayer(
+                                  inputValue, 
+                                  awayTeamPlayers, 
+                                  (resolvedName) => updatePenalty('away', index, 'player', resolvedName),
+                                  `away-penalty-${index}`
+                                );
                               }}
                               placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
