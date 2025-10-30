@@ -340,6 +340,21 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
     return goalies;
   };
 
+  const resolvePlayerByJersey = (input: string, teamPlayers: Player[]) => {
+    // If input is empty, return empty
+    if (!input.trim()) return '';
+    
+    // Check if input is a number (jersey number)
+    const jerseyNumber = parseInt(input.trim());
+    if (!isNaN(jerseyNumber)) {
+      const player = teamPlayers.find(p => p.jerseyNumber === jerseyNumber);
+      return player ? player.name : '';
+    }
+    
+    // If not a number, treat as player name
+    return input;
+  };
+
   if (loading) {
     return <div className="text-center py-12">Loading game...</div>;
   }
@@ -740,42 +755,42 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Scorer</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.scorer}
-                              onChange={(e) => updateGoal('home', index, 'scorer', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
+                                updateGoal('home', index, 'scorer', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {homeTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Assist 1</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.assist1}
-                              onChange={(e) => updateGoal('home', index, 'assist1', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
+                                updateGoal('home', index, 'assist1', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {homeTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Assist 2</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.assist2}
-                              onChange={(e) => updateGoal('home', index, 'assist2', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
+                                updateGoal('home', index, 'assist2', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {homeTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                         </div>
                         {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
@@ -813,42 +828,42 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Scorer</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.scorer}
-                              onChange={(e) => updateGoal('away', index, 'scorer', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
+                                updateGoal('away', index, 'scorer', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {awayTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Assist 1</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.assist1}
-                              onChange={(e) => updateGoal('away', index, 'assist1', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
+                                updateGoal('away', index, 'assist1', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {awayTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Assist 2</label>
-                            <select
+                            <input
+                              type="text"
                               value={goal.assist2}
-                              onChange={(e) => updateGoal('away', index, 'assist2', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
+                                updateGoal('away', index, 'assist2', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select</option>
-                              {awayTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                         </div>
                         {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
@@ -914,16 +929,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                         <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
-                            <select
+                            <input
+                              type="text"
                               value={penalty.player}
-                              onChange={(e) => updatePenalty('home', index, 'player', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, homeTeamPlayers);
+                                updatePenalty('home', index, 'player', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select player</option>
-                              {homeTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>
@@ -972,16 +987,16 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                         <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
-                            <select
+                            <input
+                              type="text"
                               value={penalty.player}
-                              onChange={(e) => updatePenalty('away', index, 'player', e.target.value)}
+                              onChange={(e) => {
+                                const resolvedName = resolvePlayerByJersey(e.target.value, awayTeamPlayers);
+                                updatePenalty('away', index, 'player', resolvedName || e.target.value);
+                              }}
+                              placeholder="Jersey # or name"
                               className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
-                            >
-                              <option value="">Select player</option>
-                              {awayTeamPlayers.map(player => (
-                                <option key={player.id} value={player.name}>{player.name}</option>
-                              ))}
-                            </select>
+                            />
                           </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Infraction</label>

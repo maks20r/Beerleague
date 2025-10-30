@@ -6,20 +6,20 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 const mavericksPlayers = [
-  'Janko Kucera',
-  'Zee Bartos',
-  'David Raguso',
-  'Vitali Sevukas',
-  'Aaron Richert',
-  'Julian Marszal',
-  'Cole James',
-  'Adam Dubroy',
-  'Mo Zigby',
-  'Pavel Sool',
-  'Roman Gavrilin',
-  'Henning Bruns',
-  'Geraud Audenaert',
-  'Ivan Simonov',
+  { name: 'Zee Bartos', jerseyNumber: 2, position: 'C' as const }, // F position mapped to C
+  { name: 'Vitali Sevukas', jerseyNumber: 5, position: 'C' as const },
+  { name: 'Mo Zigby', jerseyNumber: 10, position: 'C' as const },
+  { name: 'David Raguso', jerseyNumber: 11, position: 'C' as const },
+  { name: 'Henning Bruns', jerseyNumber: 17, position: 'C' as const },
+  { name: 'Adam Dubroy', jerseyNumber: 18, position: 'C' as const },
+  { name: 'Geraud Audenaert', jerseyNumber: 23, position: 'C' as const },
+  { name: 'Ivan Simonov', jerseyNumber: 24, position: 'C' as const },
+  { name: 'Roman Gavrilin', jerseyNumber: 25, position: 'C' as const },
+  { name: 'Cole Rowden', jerseyNumber: 37, position: 'C' as const },
+  { name: 'Aaron Richert', jerseyNumber: 43, position: 'C' as const },
+  { name: 'Julian Marszal', jerseyNumber: 50, position: 'C' as const },
+  { name: 'Pavel Sool', jerseyNumber: 68, position: 'C' as const },
+  { name: 'Janko Kucera', jerseyNumber: 83, position: 'C' as const },
 ];
 
 export default function PopulateMavericks() {
@@ -61,14 +61,13 @@ export default function PopulateMavericks() {
       setStatus(`Removed ${existingPlayersSnapshot.size} existing players. Adding ${mavericksPlayers.length} new players...`);
 
       for (let i = 0; i < mavericksPlayers.length; i++) {
-        const playerName = mavericksPlayers[i];
-        const jerseyNumber = i < 5 ? i + 1 : 6; // First 5 get 1-5, rest get 6
+        const player = mavericksPlayers[i];
 
         const playerData = {
-          name: playerName,
+          name: player.name,
           teamId: teamId, // Use the actual team ID from database
-          jerseyNumber: jerseyNumber,
-          position: 'C' as const,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
           goals: 0,
           assists: 0,
           points: 0,
@@ -77,7 +76,7 @@ export default function PopulateMavericks() {
         };
 
         await addDoc(playersCol, playerData);
-        setStatus(`Added ${i + 1}/${mavericksPlayers.length}: ${playerName} (#${jerseyNumber} - X)`);
+        setStatus(`Added ${i + 1}/${mavericksPlayers.length}: ${player.name} (#${player.jerseyNumber})`);
       }
 
       setStatus(`✓ Successfully added all ${mavericksPlayers.length} players to Mavericks roster!`);
@@ -105,13 +104,12 @@ export default function PopulateMavericks() {
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <h4 className="font-semibold text-blue-900 mb-3">Mavericks ({mavericksPlayers.length} players)</h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {mavericksPlayers.map((playerName, index) => {
-              const jerseyNumber = index < 5 ? index + 1 : 6;
+            {mavericksPlayers.map((player, index) => {
               return (
                 <div key={index} className="flex items-center">
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                   <span className="text-blue-800">
-                    #{jerseyNumber} {playerName} (X)
+                    #{player.jerseyNumber} {player.name} ({player.position})
                   </span>
                 </div>
               );

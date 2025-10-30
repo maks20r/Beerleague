@@ -6,20 +6,20 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 const bashersPlayers = [
-  'Chris Doolan',
-  'Chris Dorrow',
-  'Jeff McIver',
-  'Bjorn Lone',
-  'Jadd Moussa',
-  'Vijay Oberoi',
-  'Bryan Lipscombe',
-  'Stuart Chan',
-  'Kane Thomson',
-  'Manuel Rodrigues',
-  'Harald Lone',
-  'Bruce Pope',
-  'Lachlan Pope',
-  'Wayne Slater',
+  { name: 'Jadd Mous', jerseyNumber: 3, position: 'C' as const },
+  { name: 'Greg Forgrave', jerseyNumber: 6, position: 'C' as const },
+  { name: 'Manny Rodrigues', jerseyNumber: 8, position: 'C' as const },
+  { name: 'Chris Doolan', jerseyNumber: 9, position: 'C' as const },
+  { name: 'Jeff McIver', jerseyNumber: 14, position: 'C' as const },
+  { name: 'Bryan Lipscombe', jerseyNumber: 17, position: 'C' as const },
+  { name: 'Kane Thomson', jerseyNumber: 18, position: 'C' as const },
+  { name: 'Vijay Oberoi', jerseyNumber: 22, position: 'C' as const },
+  { name: 'Bjorn Lone', jerseyNumber: 44, position: 'C' as const },
+  { name: 'Chris Dorrow', jerseyNumber: 55, position: 'C' as const },
+  { name: 'XL Lachlan Pope', jerseyNumber: 69, position: 'C' as const },
+  { name: 'Bruce Pope', jerseyNumber: 77, position: 'C' as const },
+  { name: 'Wayne Slater', jerseyNumber: 82, position: 'C' as const },
+  { name: 'Harald Lone', jerseyNumber: 86, position: 'C' as const },
 ];
 
 export default function PopulateBashers() {
@@ -61,13 +61,13 @@ export default function PopulateBashers() {
       setStatus(`Removed ${existingPlayersSnapshot.size} existing players. Adding ${bashersPlayers.length} new players...`);
 
       for (let i = 0; i < bashersPlayers.length; i++) {
-        const playerName = bashersPlayers[i];
+        const player = bashersPlayers[i];
 
         const playerData = {
-          name: playerName,
+          name: player.name,
           teamId: teamId, // Use the actual team ID from database
-          jerseyNumber: 6,
-          position: 'C' as const,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
           goals: 0,
           assists: 0,
           points: 0,
@@ -76,7 +76,7 @@ export default function PopulateBashers() {
         };
 
         await addDoc(playersCol, playerData);
-        setStatus(`Added ${i + 1}/${bashersPlayers.length}: ${playerName} (#6 - X)`);
+        setStatus(`Added ${i + 1}/${bashersPlayers.length}: ${player.name} (#${player.jerseyNumber})`);
       }
 
       setStatus(`✓ Successfully added all ${bashersPlayers.length} players to Bashers roster!`);
@@ -104,12 +104,12 @@ export default function PopulateBashers() {
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <h4 className="font-semibold text-blue-900 mb-3">Bashers ({bashersPlayers.length} players)</h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {bashersPlayers.map((playerName, index) => {
+            {bashersPlayers.map((player, index) => {
               return (
                 <div key={index} className="flex items-center">
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                   <span className="text-blue-800">
-                    #6 {playerName} (X)
+                    #{player.jerseyNumber} {player.name} ({player.position})
                   </span>
                 </div>
               );

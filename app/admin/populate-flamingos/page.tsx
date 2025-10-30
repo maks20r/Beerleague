@@ -6,20 +6,20 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 const flamingosPlayers = [
-  'Roger Graham',
-  'Aaron Vanney',
-  'Jason Ishida',
-  'Volodymr Yaroshko',
-  'Jalel Abougouche',
-  'Mitch Shewchuk',
-  'Raj Mann',
-  'Mike Duncan',
-  'Warren Harmatiuk',
-  'Chas Williams',
-  'Pierre Keusseyan',
-  'Noah Tisdall',
-  'Jeff Tisdall',
-  'Michael Holmes',
+  { name: 'Volodymr Yaroshko', jerseyNumber: 2, position: 'C' as const }, // Vova
+  { name: 'Michael Holmes', jerseyNumber: 4, position: 'C' as const }, // HOLMES
+  { name: 'Mike Duncan', jerseyNumber: 13, position: 'C' as const }, // Duncan
+  { name: 'Jason Ishida', jerseyNumber: 18, position: 'C' as const }, // Ishida (using 18 as it appears multiple times)
+  { name: 'Mitch Shewchuk', jerseyNumber: 17, position: 'C' as const }, // Mitch
+  { name: 'Chas Williams', jerseyNumber: 21, position: 'C' as const }, // Chas
+  { name: 'Raj Mann', jerseyNumber: 23, position: 'C' as const }, // Raj Mann
+  { name: 'Jalel Abougouche', jerseyNumber: 88, position: 'C' as const }, // Jalel
+  { name: 'Roger Graham', jerseyNumber: 22, position: 'C' as const }, // Roger
+  { name: 'Pierre Keusseyan', jerseyNumber: 77, position: 'C' as const }, // Pierre
+  { name: 'Warren Harmatiuk', jerseyNumber: 73, position: 'C' as const }, // Warren
+  { name: 'Aaron Vanney', jerseyNumber: 9, position: 'C' as const }, // Vanney
+  { name: 'Jeff Tisdall', jerseyNumber: 44, position: 'C' as const }, // Jeff
+  { name: 'Noah Tisdall', jerseyNumber: 91, position: 'C' as const }, // Noah
 ];
 
 export default function PopulateFlamingos() {
@@ -61,13 +61,13 @@ export default function PopulateFlamingos() {
       setStatus(`Removed ${existingPlayersSnapshot.size} existing players. Adding ${flamingosPlayers.length} new players...`);
 
       for (let i = 0; i < flamingosPlayers.length; i++) {
-        const playerName = flamingosPlayers[i];
+        const player = flamingosPlayers[i];
 
         const playerData = {
-          name: playerName,
+          name: player.name,
           teamId: teamId,
-          jerseyNumber: 6,
-          position: 'C' as const,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
           goals: 0,
           assists: 0,
           points: 0,
@@ -76,7 +76,7 @@ export default function PopulateFlamingos() {
         };
 
         await addDoc(playersCol, playerData);
-        setStatus(`Added ${i + 1}/${flamingosPlayers.length}: ${playerName} (#6 - X)`);
+        setStatus(`Added ${i + 1}/${flamingosPlayers.length}: ${player.name} (#${player.jerseyNumber})`);
       }
 
       setStatus(`✓ Successfully added all ${flamingosPlayers.length} players to Flamingos roster!`);
@@ -104,12 +104,12 @@ export default function PopulateFlamingos() {
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <h4 className="font-semibold text-blue-900 mb-3">Flamingos ({flamingosPlayers.length} players)</h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {flamingosPlayers.map((playerName, index) => {
+            {flamingosPlayers.map((player, index) => {
               return (
                 <div key={index} className="flex items-center">
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                   <span className="text-blue-800">
-                    #6 {playerName} (X)
+                    #{player.jerseyNumber} {player.name} ({player.position})
                   </span>
                 </div>
               );

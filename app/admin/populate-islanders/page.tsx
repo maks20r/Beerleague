@@ -6,20 +6,19 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 const islandersPlayers = [
-  'Yanis Benkhanouche',
-  'Hassan Hannouf',
-  'Raphael Guillebon',
-  'Nikola Kerezovic',
-  'Tobias Madsen',
-  'Max Gerstein',
-  'Greg Forgrave',
-  'Rami Zayat',
-  'Tero Kilpela',
-  'Yasha Zislin',
-  'Brad Traynor',
-  'Christine Nass',
-  'Pierre Heitzmann',
-  'Veronika Konecna',
+  { name: 'Yanis Benkhanouche', jerseyNumber: 8, position: 'C' as const },
+  { name: 'Michael Custer', jerseyNumber: 10, position: 'C' as const },
+  { name: 'Nikola Kerezovic', jerseyNumber: 11, position: 'C' as const },
+  { name: 'Brad Traynor', jerseyNumber: 13, position: 'C' as const },
+  { name: 'Max Gerstein', jerseyNumber: 14, position: 'C' as const },
+  { name: 'Veronika Konecna', jerseyNumber: 18, position: 'C' as const },
+  { name: 'Tobias Madsen', jerseyNumber: 21, position: 'C' as const },
+  { name: 'Yasha Zislin', jerseyNumber: 22, position: 'C' as const },
+  { name: 'Raphael Guillebon', jerseyNumber: 23, position: 'C' as const },
+  { name: 'Tero Kilpela', jerseyNumber: 44, position: 'C' as const },
+  { name: 'Terry Roberts', jerseyNumber: 55, position: 'C' as const },
+  { name: 'Rami Zayat', jerseyNumber: 77, position: 'C' as const },
+  { name: 'Hassan Hannouf', jerseyNumber: 88, position: 'C' as const },
 ];
 
 export default function PopulateIslanders() {
@@ -61,13 +60,13 @@ export default function PopulateIslanders() {
       setStatus(`Removed ${existingPlayersSnapshot.size} existing players. Adding ${islandersPlayers.length} new players...`);
 
       for (let i = 0; i < islandersPlayers.length; i++) {
-        const playerName = islandersPlayers[i];
+        const player = islandersPlayers[i];
 
         const playerData = {
-          name: playerName,
+          name: player.name,
           teamId: teamId,
-          jerseyNumber: 6,
-          position: 'C' as const,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
           goals: 0,
           assists: 0,
           points: 0,
@@ -76,7 +75,7 @@ export default function PopulateIslanders() {
         };
 
         await addDoc(playersCol, playerData);
-        setStatus(`Added ${i + 1}/${islandersPlayers.length}: ${playerName} (#6 - X)`);
+        setStatus(`Added ${i + 1}/${islandersPlayers.length}: ${player.name} (#${player.jerseyNumber})`);
       }
 
       setStatus(`✓ Successfully added all ${islandersPlayers.length} players to Islanders roster!`);
@@ -104,12 +103,12 @@ export default function PopulateIslanders() {
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <h4 className="font-semibold text-blue-900 mb-3">Islanders ({islandersPlayers.length} players)</h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {islandersPlayers.map((playerName, index) => {
+            {islandersPlayers.map((player, index) => {
               return (
                 <div key={index} className="flex items-center">
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                   <span className="text-blue-800">
-                    #6 {playerName} (X)
+                    #{player.jerseyNumber} {player.name} ({player.position})
                   </span>
                 </div>
               );

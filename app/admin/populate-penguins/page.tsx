@@ -6,20 +6,20 @@ import { db } from '@/lib/firebase';
 import { useRouter } from 'next/navigation';
 
 const penguinsPlayers = [
-  'Jamie Holland',
-  'Mattias Metzger',
-  'Jaska Tuominen',
-  'Pyry Taskila',
-  'Will Smith',
-  'Michael Banner',
-  'Michael Custer',
-  'Jarkko Lasanen',
-  'Shel Hutton',
-  'Terry Roberts',
-  'Tobias Drulinski',
-  'Sebastien Barret',
-  'Tero Taskila',
-  'Jonathan Doerr',
+  { name: 'Jaska', jerseyNumber: 3, position: 'C' as const },
+  { name: 'Sebastian Taskila', jerseyNumber: 12, position: 'C' as const },
+  { name: 'Sébastien', jerseyNumber: 24, position: 'C' as const },
+  { name: 'Michael Banner', jerseyNumber: 27, position: 'C' as const },
+  { name: 'Jarkko Lasanen', jerseyNumber: 33, position: 'C' as const },
+  { name: 'Mattias Metzger', jerseyNumber: 39, position: 'C' as const }, // Fixed spelling from "metzger"
+  { name: 'Wil Smith', jerseyNumber: 43, position: 'C' as const },
+  { name: 'Jamie Holland', jerseyNumber: 49, position: 'C' as const }, // Fixed capitalization
+  { name: 'Tero Taskila', jerseyNumber: 55, position: 'C' as const },
+  { name: 'Shell', jerseyNumber: 72, position: 'C' as const },
+  { name: 'Stu', jerseyNumber: 80, position: 'C' as const },
+  { name: 'Tobias Drulinski', jerseyNumber: 86, position: 'C' as const },
+  { name: 'Christine Naas', jerseyNumber: 91, position: 'C' as const },
+  { name: 'Jonathan Doerr', jerseyNumber: 97, position: 'C' as const },
 ];
 
 export default function PopulatePenguins() {
@@ -61,13 +61,13 @@ export default function PopulatePenguins() {
       setStatus(`Removed ${existingPlayersSnapshot.size} existing players. Adding ${penguinsPlayers.length} new players...`);
 
       for (let i = 0; i < penguinsPlayers.length; i++) {
-        const playerName = penguinsPlayers[i];
+        const player = penguinsPlayers[i];
 
         const playerData = {
-          name: playerName,
+          name: player.name,
           teamId: teamId,
-          jerseyNumber: 6,
-          position: 'C' as const,
+          jerseyNumber: player.jerseyNumber,
+          position: player.position,
           goals: 0,
           assists: 0,
           points: 0,
@@ -76,7 +76,7 @@ export default function PopulatePenguins() {
         };
 
         await addDoc(playersCol, playerData);
-        setStatus(`Added ${i + 1}/${penguinsPlayers.length}: ${playerName} (#6 - X)`);
+        setStatus(`Added ${i + 1}/${penguinsPlayers.length}: ${player.name} (#${player.jerseyNumber})`);
       }
 
       setStatus(`✓ Successfully added all ${penguinsPlayers.length} players to Penguins roster!`);
@@ -104,12 +104,12 @@ export default function PopulatePenguins() {
         <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
           <h4 className="font-semibold text-blue-900 mb-3">Penguins ({penguinsPlayers.length} players)</h4>
           <div className="grid md:grid-cols-2 gap-2">
-            {penguinsPlayers.map((playerName, index) => {
+            {penguinsPlayers.map((player, index) => {
               return (
                 <div key={index} className="flex items-center">
                   <span className="w-2 h-2 bg-blue-600 rounded-full mr-2"></span>
                   <span className="text-blue-800">
-                    #6 {playerName} (X)
+                    #{player.jerseyNumber} {player.name} ({player.position})
                   </span>
                 </div>
               );

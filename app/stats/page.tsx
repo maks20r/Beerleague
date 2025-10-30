@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getPlayers, getGoalies } from '@/lib/db';
-import { Player, Goalie } from '@/types';
+import { getPlayers, getGoalies, getTeams } from '@/lib/db';
+import { Player, Goalie, Team } from '@/types';
 
 export default function StatsPage() {
   const [players, setPlayers] = useState<Player[]>([]);
   const [goalies, setGoalies] = useState<Goalie[]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDivision, setSelectedDivision] = useState<'A' | 'B'>('A');
   const [showAllPlayers, setShowAllPlayers] = useState(false);
@@ -20,13 +21,14 @@ export default function StatsPage() {
 
         const dataPromise = Promise.all([
           getPlayers(selectedDivision),
-          getGoalies()
+          getGoalies(),
+          getTeams()
         ]);
 
-        const [playersData, goaliesData] = await Promise.race([
+        const [playersData, goaliesData, teamsData] = await Promise.race([
           dataPromise,
           timeoutPromise
-        ]) as [Player[], Goalie[]];
+        ]) as [Player[], Goalie[], Team[]];
 
         setPlayers(showAllPlayers ? playersData : playersData.slice(0, 10));
         setGoalies(goaliesData
@@ -34,6 +36,7 @@ export default function StatsPage() {
           .sort((a, b) => b.savePercentage - a.savePercentage)
           .slice(0, 10)
         );
+        setTeams(teamsData);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -43,6 +46,11 @@ export default function StatsPage() {
 
     fetchData();
   }, [selectedDivision, showAllPlayers]);
+
+  const getTeamName = (teamId: string) => {
+    const team = teams.find(t => t.id === teamId);
+    return team ? team.name : 'Unknown';
+  };
 
   if (loading) {
     return (
@@ -98,6 +106,7 @@ export default function StatsPage() {
                 <thead className="bg-[#faf6ee] border-b">
                   <tr>
                     <th className="px-6 py-4 text-left font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Player</th>
+                    <th className="px-6 py-4 text-center font-semibold text-gray-700">Team</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">Pos</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">#</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
@@ -111,6 +120,7 @@ export default function StatsPage() {
                   {players.map((player, index) => (
                     <tr key={player.id} className={index % 2 === 0 ? 'bg-white' : 'bg-[#faf6ee]'}>
                       <td className="px-6 py-4 font-medium text-gray-900 sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{player.name}</td>
+                      <td className="px-6 py-4 text-center text-gray-700">{getTeamName(player.teamId)}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.jerseyNumber}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>

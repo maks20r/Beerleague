@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getTeams, getPlayers, deletePlayer } from '@/lib/db';
 import { Team, Player } from '@/types';
 
 export default function RostersPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [teams, setTeams] = useState<Team[]>([]);
   const [players, setPlayers] = useState<Player[]>([]);
   const [loading, setLoading] = useState(true);
@@ -42,6 +43,14 @@ export default function RostersPage() {
   useEffect(() => {
     fetchData();
   }, [selectedDivision]);
+
+  useEffect(() => {
+    // Restore selected team from URL params
+    const teamIdParam = searchParams.get('teamId');
+    if (teamIdParam) {
+      setSelectedTeamId(teamIdParam);
+    }
+  }, [searchParams]);
 
   const fetchData = async () => {
     try {
@@ -486,7 +495,7 @@ export default function RostersPage() {
                     <td className="px-3 sm:px-6 py-4">
                       <div className="flex flex-row gap-4 items-center justify-center">
                         <button
-                          onClick={() => router.push(`/admin/rosters/players/${player.id}/edit`)}
+                          onClick={() => router.push(`/admin/rosters/players/${player.id}/edit?teamId=${selectedTeamId}`)}
                           className="text-black hover:opacity-60 font-medium transition text-xs sm:text-sm whitespace-nowrap"
                         >
                           ✏️ Edit

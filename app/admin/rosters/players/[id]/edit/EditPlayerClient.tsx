@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { getPlayerById, updatePlayer, getTeams } from '@/lib/db';
 import { Player, Team } from '@/types';
 
@@ -11,6 +11,8 @@ interface EditPlayerClientProps {
 
 export default function EditPlayerClient({ playerId }: EditPlayerClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const teamId = searchParams.get('teamId');
 
   const [player, setPlayer] = useState<Player | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
@@ -88,7 +90,9 @@ export default function EditPlayerClient({ playerId }: EditPlayerClientProps) {
 
     try {
       await updatePlayer(playerId, playerData);
-      router.push('/admin/rosters');
+      // Redirect back with teamId to preserve the selected team view
+      const redirectUrl = teamId ? `/admin/rosters?teamId=${teamId}` : '/admin/rosters';
+      router.push(redirectUrl);
     } catch (error) {
       console.error('Error updating player:', error);
       alert('Error updating player. Please try again.');
@@ -110,7 +114,10 @@ export default function EditPlayerClient({ playerId }: EditPlayerClientProps) {
       <div className="max-w-4xl mx-auto p-4 sm:p-8">
         <div className="mb-6">
           <button
-            onClick={() => router.push('/admin/rosters')}
+            onClick={() => {
+              const backUrl = teamId ? `/admin/rosters?teamId=${teamId}` : '/admin/rosters';
+              router.push(backUrl);
+            }}
             className="text-gray-600 hover:text-gray-900 font-medium flex items-center gap-2 mb-4"
           >
             ← Back to Rosters
@@ -245,7 +252,10 @@ export default function EditPlayerClient({ playerId }: EditPlayerClientProps) {
         <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-end mt-6">
           <button
             type="button"
-            onClick={() => router.push('/admin/rosters')}
+            onClick={() => {
+              const cancelUrl = teamId ? `/admin/rosters?teamId=${teamId}` : '/admin/rosters';
+              router.push(cancelUrl);
+            }}
             className="w-full sm:w-auto px-6 sm:px-10 py-3 sm:py-4 bg-gray-200 hover:bg-gray-300 border border-gray-300 rounded-lg transition-all duration-300 font-bold text-sm sm:text-base text-gray-700 hover:text-gray-900"
           >
             Cancel
