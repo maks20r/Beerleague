@@ -59,22 +59,26 @@ export interface Game {
     assist1: string;
     assist2: string;
     time: string;
+    period: string;
   }>;
   awayGoals?: Array<{
     scorer: string;
     assist1: string;
     assist2: string;
     time: string;
+    period: string;
   }>;
   homePenalties?: Array<{
     player: string;
     infraction: string;
     minutes: string;
+    period: string;
   }>;
   awayPenalties?: Array<{
     player: string;
     infraction: string;
     minutes: string;
+    period: string;
   }>;
 }
 

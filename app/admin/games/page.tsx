@@ -43,22 +43,26 @@ export default function GamesPage() {
       assist1: string;
       assist2: string;
       time: string;
+      period: string;
     }>,
     awayGoals: [] as Array<{
       scorer: string;
       assist1: string;
       assist2: string;
       time: string;
+      period: string;
     }>,
     homePenalties: [] as Array<{
       player: string;
       infraction: string;
       minutes: string;
+      period: string;
     }>,
     awayPenalties: [] as Array<{
       player: string;
       infraction: string;
       minutes: string;
+      period: string;
     }>
   });
 

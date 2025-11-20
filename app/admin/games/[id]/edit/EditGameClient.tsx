@@ -47,22 +47,26 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
       assist1: string;
       assist2: string;
       time: string;
+      period: string;
     }>,
     awayGoals: [] as Array<{
       scorer: string;
       assist1: string;
       assist2: string;
       time: string;
+      period: string;
     }>,
     homePenalties: [] as Array<{
       player: string;
       infraction: string;
       minutes: string;
+      period: string;
     }>,
     awayPenalties: [] as Array<{
       player: string;
       infraction: string;
       minutes: string;
+      period: string;
     }>
   });
 
@@ -76,52 +80,52 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
   useEffect(() => {
     // Check home goals
     const lastHomeGoal = resultsData.homeGoals[resultsData.homeGoals.length - 1];
-    if (!lastHomeGoal || (lastHomeGoal.scorer || lastHomeGoal.assist1 || lastHomeGoal.assist2 || lastHomeGoal.time)) {
+    if (!lastHomeGoal || (lastHomeGoal.scorer || lastHomeGoal.assist1 || lastHomeGoal.assist2 || lastHomeGoal.time || lastHomeGoal.period)) {
       // If there's no last goal or the last goal has some data, ensure there's an empty one
-      const hasEmptyHomeGoal = resultsData.homeGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time);
+      const hasEmptyHomeGoal = resultsData.homeGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time && !goal.period);
       if (!hasEmptyHomeGoal) {
         setResultsData(prev => ({
           ...prev,
-          homeGoals: [...prev.homeGoals, { scorer: '', assist1: '', assist2: '', time: '' }]
+          homeGoals: [...prev.homeGoals, { scorer: '', assist1: '', assist2: '', time: '', period: '' }]
         }));
       }
     }
 
     // Check away goals
     const lastAwayGoal = resultsData.awayGoals[resultsData.awayGoals.length - 1];
-    if (!lastAwayGoal || (lastAwayGoal.scorer || lastAwayGoal.assist1 || lastAwayGoal.assist2 || lastAwayGoal.time)) {
+    if (!lastAwayGoal || (lastAwayGoal.scorer || lastAwayGoal.assist1 || lastAwayGoal.assist2 || lastAwayGoal.time || lastAwayGoal.period)) {
       // If there's no last goal or the last goal has some data, ensure there's an empty one
-      const hasEmptyAwayGoal = resultsData.awayGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time);
+      const hasEmptyAwayGoal = resultsData.awayGoals.some(goal => !goal.scorer && !goal.assist1 && !goal.assist2 && !goal.time && !goal.period);
       if (!hasEmptyAwayGoal) {
         setResultsData(prev => ({
           ...prev,
-          awayGoals: [...prev.awayGoals, { scorer: '', assist1: '', assist2: '', time: '' }]
+          awayGoals: [...prev.awayGoals, { scorer: '', assist1: '', assist2: '', time: '', period: '' }]
         }));
       }
     }
 
     // Check home penalties
     const lastHomePenalty = resultsData.homePenalties[resultsData.homePenalties.length - 1];
-    if (!lastHomePenalty || (lastHomePenalty.player || lastHomePenalty.infraction || lastHomePenalty.minutes)) {
+    if (!lastHomePenalty || (lastHomePenalty.player || lastHomePenalty.infraction || lastHomePenalty.minutes || lastHomePenalty.period)) {
       // If there's no last penalty or the last penalty has some data, ensure there's an empty one
-      const hasEmptyHomePenalty = resultsData.homePenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes);
+      const hasEmptyHomePenalty = resultsData.homePenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes && !penalty.period);
       if (!hasEmptyHomePenalty) {
         setResultsData(prev => ({
           ...prev,
-          homePenalties: [...prev.homePenalties, { player: '', infraction: '', minutes: '' }]
+          homePenalties: [...prev.homePenalties, { player: '', infraction: '', minutes: '', period: '' }]
         }));
       }
     }
 
     // Check away penalties
     const lastAwayPenalty = resultsData.awayPenalties[resultsData.awayPenalties.length - 1];
-    if (!lastAwayPenalty || (lastAwayPenalty.player || lastAwayPenalty.infraction || lastAwayPenalty.minutes)) {
+    if (!lastAwayPenalty || (lastAwayPenalty.player || lastAwayPenalty.infraction || lastAwayPenalty.minutes || lastAwayPenalty.period)) {
       // If there's no last penalty or the last penalty has some data, ensure there's an empty one
-      const hasEmptyAwayPenalty = resultsData.awayPenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes);
+      const hasEmptyAwayPenalty = resultsData.awayPenalties.some(penalty => !penalty.player && !penalty.infraction && !penalty.minutes && !penalty.period);
       if (!hasEmptyAwayPenalty) {
         setResultsData(prev => ({
           ...prev,
-          awayPenalties: [...prev.awayPenalties, { player: '', infraction: '', minutes: '' }]
+          awayPenalties: [...prev.awayPenalties, { player: '', infraction: '', minutes: '', period: '' }]
         }));
       }
     }
@@ -169,10 +173,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
       setResultsData({
         homeShots: gameData.homeShots?.toString() || '',
         awayShots: gameData.awayShots?.toString() || '',
-        homeGoals: (gameData.homeGoals && gameData.homeGoals.length > 0) ? gameData.homeGoals : [{ scorer: '', assist1: '', assist2: '', time: '' }],
-        awayGoals: (gameData.awayGoals && gameData.awayGoals.length > 0) ? gameData.awayGoals : [{ scorer: '', assist1: '', assist2: '', time: '' }],
-        homePenalties: (gameData.homePenalties && gameData.homePenalties.length > 0) ? gameData.homePenalties : [{ player: '', infraction: '', minutes: '' }],
-        awayPenalties: (gameData.awayPenalties && gameData.awayPenalties.length > 0) ? gameData.awayPenalties : [{ player: '', infraction: '', minutes: '' }]
+        homeGoals: (gameData.homeGoals && gameData.homeGoals.length > 0) ? gameData.homeGoals.map(goal => ({...goal, period: goal.period || ''})) : [{ scorer: '', assist1: '', assist2: '', time: '', period: '' }],
+        awayGoals: (gameData.awayGoals && gameData.awayGoals.length > 0) ? gameData.awayGoals.map(goal => ({...goal, period: goal.period || ''})) : [{ scorer: '', assist1: '', assist2: '', time: '', period: '' }],
+        homePenalties: (gameData.homePenalties && gameData.homePenalties.length > 0) ? gameData.homePenalties.map(penalty => ({...penalty, period: penalty.period || ''})) : [{ player: '', infraction: '', minutes: '', period: '' }],
+        awayPenalties: (gameData.awayPenalties && gameData.awayPenalties.length > 0) ? gameData.awayPenalties.map(penalty => ({...penalty, period: penalty.period || ''})) : [{ player: '', infraction: '', minutes: '', period: '' }]
       });
     } catch (error) {
       console.error('Error fetching game:', error);
@@ -204,10 +208,10 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
         venue: formData.venue || '',
         shootout: formData.shootout,
         status: gameStatus,
-        homeGoals: resultsData.homeGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
-        awayGoals: resultsData.awayGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time),
-        homePenalties: resultsData.homePenalties.filter(p => p.player || p.infraction || p.minutes),
-        awayPenalties: resultsData.awayPenalties.filter(p => p.player || p.infraction || p.minutes)
+        homeGoals: resultsData.homeGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time || g.period),
+        awayGoals: resultsData.awayGoals.filter(g => g.scorer || g.assist1 || g.assist2 || g.time || g.period),
+        homePenalties: resultsData.homePenalties.filter(p => p.player || p.infraction || p.minutes || p.period),
+        awayPenalties: resultsData.awayPenalties.filter(p => p.player || p.infraction || p.minutes || p.period)
       };
 
       // Only add fields if they have values
@@ -785,7 +789,22 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     </div>
                     {resultsData.homeGoals.map((goal, index) => (
                       <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                        <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Period</label>
+                            <select
+                              value={goal.period}
+                              onChange={(e) => updateGoal('home', index, 'period', e.target.value)}
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">--</option>
+                              <option value="1">1st</option>
+                              <option value="2">2nd</option>
+                              <option value="3">3rd</option>
+                              <option value="OT">OT</option>
+                              <option value="SO">SO</option>
+                            </select>
+                          </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
                             <input
@@ -860,7 +879,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             />
                           </div>
                         </div>
-                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
+                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time || goal.period) && (
                           <button
                             type="button"
                             onClick={() => removeGoal('home', index)}
@@ -882,7 +901,22 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     </div>
                     {resultsData.awayGoals.map((goal, index) => (
                       <div key={index} className="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                        <div className="grid grid-cols-4 gap-1 sm:gap-2">
+                        <div className="grid grid-cols-5 gap-1 sm:gap-2">
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">Period</label>
+                            <select
+                              value={goal.period}
+                              onChange={(e) => updateGoal('away', index, 'period', e.target.value)}
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">--</option>
+                              <option value="1">1st</option>
+                              <option value="2">2nd</option>
+                              <option value="3">3rd</option>
+                              <option value="OT">OT</option>
+                              <option value="SO">SO</option>
+                            </select>
+                          </div>
                           <div>
                             <label className="block text-xs font-medium text-gray-600 mb-1">Time</label>
                             <input
@@ -957,7 +991,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             />
                           </div>
                         </div>
-                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time) && (
+                        {(goal.scorer || goal.assist1 || goal.assist2 || goal.time || goal.period) && (
                           <button
                             type="button"
                             onClick={() => removeGoal('away', index)}
@@ -1017,7 +1051,21 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     </div>
                     {resultsData.homePenalties.map((penalty, index) => (
                       <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                        <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
+                        <div className="grid grid-cols-4 gap-1 sm:gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Period</label>
+                            <select
+                              value={penalty.period}
+                              onChange={(e) => updatePenalty('home', index, 'period', e.target.value)}
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">--</option>
+                              <option value="1">1st</option>
+                              <option value="2">2nd</option>
+                              <option value="3">3rd</option>
+                              <option value="OT">OT</option>
+                            </select>
+                          </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
                             <input
@@ -1061,7 +1109,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             />
                           </div>
                         </div>
-                        {(penalty.player || penalty.infraction || penalty.minutes) && (
+                        {(penalty.player || penalty.infraction || penalty.minutes || penalty.period) && (
                           <button
                             type="button"
                             onClick={() => removePenalty('home', index)}
@@ -1083,7 +1131,21 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                     </div>
                     {resultsData.awayPenalties.map((penalty, index) => (
                       <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border-2 border-gray-200">
-                        <div className="grid grid-cols-3 gap-1 sm:gap-3 mb-3">
+                        <div className="grid grid-cols-4 gap-1 sm:gap-3 mb-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-700 mb-1">Period</label>
+                            <select
+                              value={penalty.period}
+                              onChange={(e) => updatePenalty('away', index, 'period', e.target.value)}
+                              className="w-full px-1 sm:px-2 py-1 border border-gray-300 rounded text-xs bg-white"
+                            >
+                              <option value="">--</option>
+                              <option value="1">1st</option>
+                              <option value="2">2nd</option>
+                              <option value="3">3rd</option>
+                              <option value="OT">OT</option>
+                            </select>
+                          </div>
                           <div>
                             <label className="block text-xs font-semibold text-gray-700 mb-1">Player</label>
                             <input
@@ -1127,7 +1189,7 @@ export default function EditGameClient({ gameId }: EditGameClientProps) {
                             />
                           </div>
                         </div>
-                        {(penalty.player || penalty.infraction || penalty.minutes) && (
+                        {(penalty.player || penalty.infraction || penalty.minutes || penalty.period) && (
                           <button
                             type="button"
                             onClick={() => removePenalty('away', index)}

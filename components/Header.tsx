@@ -71,7 +71,6 @@ export default function Header() {
                 <Link href="/schedule" className={pathname === '/schedule' ? 'active' : ''}>Schedule</Link>
                 <Link href="https://hockeydubai.com/events/" className={pathname === '/events' ? 'active' : ''}>Events</Link>
                 <Link href="https://hockeydubai.com/mighty-camels/" className={pathname === '/mighty-camels-eihl' ? 'active' : ''}>Mighty Camels EIHL</Link>
-                <Link href="https://hockeydubai.com/register2025-2026/" className={pathname === '/register' ? 'active' : ''}>Register now</Link>
               </div>
             </div>
           )}
@@ -163,12 +162,6 @@ export default function Header() {
                   className={pathname === '/mighty-camels-eihl' ? 'active' : ''}
                 >
                   Mighty Camels EIHL
-                </Link>
-                <Link
-                  href="https://hockeydubai.com/register2025-2026/"
-                  className={pathname === '/register' ? 'active' : ''}
-                >
-                  Register now
                 </Link>
               </>
             )}
