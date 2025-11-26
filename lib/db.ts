@@ -681,9 +681,7 @@ export const updatePlayerStatsFromGame = async (
           goals: player.goals + stats.goals,
           assists: player.assists + stats.assists,
           points: player.points + stats.goals + stats.assists,
-          penaltyMinutes: player.penaltyMinutes + stats.penaltyMinutes,
-          // Only increment games played if this is a new game (no old data)
-          ...(oldGameData ? {} : { gamesPlayed: player.gamesPlayed + 1 })
+          penaltyMinutes: player.penaltyMinutes + stats.penaltyMinutes
         };
 
         await updatePlayer(player.id, updatedStats);

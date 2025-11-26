@@ -69,8 +69,7 @@ export default function PopulateWildcats() {
           goals: 0,
           assists: 0,
           points: 0,
-          penaltyMinutes: 0,
-          gamesPlayed: 0,
+          penaltyMinutes: 0
         };
 
         await addDoc(playersCol, playerData);

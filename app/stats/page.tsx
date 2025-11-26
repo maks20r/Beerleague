@@ -32,7 +32,6 @@ export default function StatsPage() {
 
         setPlayers(showAllPlayers ? playersData : playersData.slice(0, 10));
         setGoalies(goaliesData
-          .filter(g => g.gamesPlayed > 0)
           .sort((a, b) => b.savePercentage - a.savePercentage)
           .slice(0, 10)
         );
@@ -109,7 +108,6 @@ export default function StatsPage() {
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">Team</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">Pos</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">#</th>
-                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">G</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">A</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
@@ -123,7 +121,6 @@ export default function StatsPage() {
                       <td className="px-6 py-4 text-center text-gray-700">{getTeamName(player.teamId)}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.jerseyNumber}</td>
-                      <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
                       <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>

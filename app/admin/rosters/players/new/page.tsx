@@ -22,8 +22,7 @@ export default function NewPlayerPage() {
     goals: '0',
     assists: '0',
     points: '0',
-    penaltyMinutes: '0',
-    gamesPlayed: '0'
+    penaltyMinutes: '0'
   });
 
   useEffect(() => {
@@ -53,8 +52,7 @@ export default function NewPlayerPage() {
       goals: parseInt(playerForm.goals),
       assists: parseInt(playerForm.assists),
       points: parseInt(playerForm.goals) + parseInt(playerForm.assists),
-      penaltyMinutes: parseInt(playerForm.penaltyMinutes),
-      gamesPlayed: parseInt(playerForm.gamesPlayed),
+      penaltyMinutes: parseInt(playerForm.penaltyMinutes)
     };
 
     try {
@@ -150,18 +148,6 @@ export default function NewPlayerPage() {
                     <option value="D">Defense (D)</option>
                     <option value="G">Goalie (G)</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Games Played
-                  </label>
-                  <input
-                    type="number"
-                    value={playerForm.gamesPlayed}
-                    onChange={(e) => setPlayerForm({ ...playerForm, gamesPlayed: e.target.value })}
-                    min="0"
-                    className="w-full px-4 py-3 border-2 border-black rounded-lg focus:ring-2 focus:ring-black focus:border-[#e9ca8a] transition text-gray-900 font-medium text-lg bg-white"
-                  />
                 </div>
               </div>
 

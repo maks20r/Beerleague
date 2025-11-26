@@ -45,7 +45,6 @@ export default function Home() {
         setTeams(teamsData);
         setPlayers(showAllPlayers ? playersData : playersData.slice(0, 10));
         setGoalies(goaliesData
-          .filter(g => g.gamesPlayed > 0)
           .sort((a, b) => b.savePercentage - a.savePercentage)
           .slice(0, 10)
         ); // Top 10 goalies by save percentage
@@ -161,7 +160,6 @@ export default function Home() {
                     <th className="px-6 py-4 text-left font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Player</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">Pos</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">#</th>
-                    <th className="px-6 py-4 text-center font-semibold text-gray-700">GP</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">G</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">A</th>
                     <th className="px-6 py-4 text-center font-semibold text-gray-700">PTS</th>
@@ -174,7 +172,6 @@ export default function Home() {
                       <td className="px-6 py-4 font-medium text-gray-900 sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{player.name}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.jerseyNumber}</td>
-                      <td className="px-6 py-4 text-center text-gray-700">{player.gamesPlayed}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
                       <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
                       <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>

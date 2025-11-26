@@ -25,8 +25,7 @@ export default function RostersPage() {
     goals: '0',
     assists: '0',
     points: '0',
-    penaltyMinutes: '0',
-    gamesPlayed: '0'
+    penaltyMinutes: '0'
   });
 
   const [teamForm, setTeamForm] = useState({
@@ -78,8 +77,7 @@ export default function RostersPage() {
       goals: parseInt(playerForm.goals),
       assists: parseInt(playerForm.assists),
       points: parseInt(playerForm.goals) + parseInt(playerForm.assists),
-      penaltyMinutes: parseInt(playerForm.penaltyMinutes),
-      gamesPlayed: parseInt(playerForm.gamesPlayed),
+      penaltyMinutes: parseInt(playerForm.penaltyMinutes)
     };
 
     try {
@@ -128,8 +126,7 @@ export default function RostersPage() {
       goals: player.goals.toString(),
       assists: player.assists.toString(),
       points: player.points.toString(),
-      penaltyMinutes: player.penaltyMinutes.toString(),
-      gamesPlayed: player.gamesPlayed.toString()
+      penaltyMinutes: player.penaltyMinutes.toString()
     });
     setShowPlayerForm(true);
   };
@@ -154,8 +151,7 @@ export default function RostersPage() {
       goals: '0',
       assists: '0',
       points: '0',
-      penaltyMinutes: '0',
-      gamesPlayed: '0'
+      penaltyMinutes: '0'
     });
     setEditingPlayer(null);
     setShowPlayerForm(false);
@@ -389,18 +385,6 @@ export default function RostersPage() {
                           <option value="G">Goalie (G)</option>
                         </select>
                       </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Games Played
-                        </label>
-                        <input
-                          type="number"
-                          value={playerForm.gamesPlayed}
-                          onChange={(e) => setPlayerForm({ ...playerForm, gamesPlayed: e.target.value })}
-                          min="0"
-                          className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-[#e9ca8a] focus:border-[#e9ca8a] transition text-gray-900 font-medium"
-                        />
-                      </div>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -473,7 +457,6 @@ export default function RostersPage() {
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700">#</th>
                   <th className="px-6 py-3 text-left text-sm font-semibold text-gray-700 sticky left-0 bg-[#faf6ee] z-10">Name</th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">Pos</th>
-                  <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700 hidden sm:table-cell">GP</th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">G</th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">A</th>
                   <th className="px-6 py-3 text-center text-sm font-semibold text-gray-700">PTS</th>
@@ -487,7 +470,6 @@ export default function RostersPage() {
                     <td className="px-6 py-4 text-gray-700">{player.jerseyNumber}</td>
                     <td className="px-6 py-4 text-gray-900 font-semibold sticky left-0 z-10" style={{backgroundColor: index % 2 === 0 ? '#ffffff' : '#faf6ee'}}>{player.name}</td>
                     <td className="px-6 py-4 text-center text-gray-700">{player.position}</td>
-                    <td className="px-6 py-4 text-center text-gray-700 hidden sm:table-cell">{player.gamesPlayed}</td>
                     <td className="px-6 py-4 text-center text-gray-700">{player.goals}</td>
                     <td className="px-6 py-4 text-center text-gray-700">{player.assists}</td>
                     <td className="px-6 py-4 text-center font-semibold text-gray-900">{player.points}</td>

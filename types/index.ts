@@ -21,7 +21,6 @@ export interface Player {
   assists: number;
   points: number;
   penaltyMinutes: number;
-  gamesPlayed: number;
 }
 
 export interface Goalie {
